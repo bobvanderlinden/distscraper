@@ -1,0 +1,14 @@
+{
+  "name": "distscraper",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "repository": "",
+  "author": "Bob van der Linden",
+  "license": "BSD",
+  "dependencies": {
+    "cheerio": "~0.9.1",
+    "request": "~2.10.0"
+  },
+  "devDependencies": {}
+}
