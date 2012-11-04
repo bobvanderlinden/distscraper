@@ -113,13 +113,26 @@ Array.prototype.flatten = function() {
 	});
 };
 
-function loadScrapers(callback) {
+function getAllScrapers(callback) {
 	var scrapersPath = path.join(__dirname,'scrapers');
 	fs.readdir(scrapersPath,function(err,files) {
 		if (err) { return callback(err); }
-		var scrapers = files.map(function(scraperName) { return require(path.join(scrapersPath,scraperName)); });
-		callback(null,scrapers);
+		files = files.map(function(file) { return path.join(scrapersPath,file); });
+		callback(null,files);
 	});
+}
+
+function getScrapers(scrapers) {
+	var scrapersPath = path.join(__dirname,'scrapers');
+	var scraperPaths = scrapers.map(function(file) { return path.join(scrapersPath,file); });
+	return function(callback) {
+		callback(null,scraperPaths);
+	};
+}
+
+function loadScrapers(scrapers,callback) {
+	var scrapers = scrapers.map(function(scraperName) { return require(scraperName); });
+	callback(null,scrapers);
 }
 
 function scrape(scrapers,callback) {
@@ -129,6 +142,7 @@ function scrape(scrapers,callback) {
 }
 
 async.waterfall([
+	getAllScrapers,
 	loadScrapers,
 	scrape
 ],function(err,distributions) {
