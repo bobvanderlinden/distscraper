@@ -141,8 +141,9 @@ function scrape(scrapers,callback) {
 	},callback);
 }
 
+var scrapers = process.argv.slice(2);
 async.waterfall([
-	getAllScrapers,
+	scrapers.length === 0 ? getAllScrapers : getScrapers(scrapers),
 	loadScrapers,
 	scrape
 ],function(err,distributions) {
