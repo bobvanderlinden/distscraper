@@ -18,11 +18,19 @@ module.exports = function(callback) {
 			var isosurl = distributionurl+version+'/iso/';
 			request.dom(isosurl,function(err,$) {
 				var releases = $('pre a').map(function(a) {
-					return (/^.*\.iso$/).exec(a.attr('href'));
+					return a.attr('href');
+				}).compact().filter(function(filename) {
+					return (/\.iso$/).test(filename);
 				}).compact().map(function(filename) {
 					return {version: version,url:isosurl+filename};
 				});
-				callback(null,releases);
+				async.map(releases,function(release,callback) {
+					request.contentlength(release.url,function(err,contentlength) {
+						if (err) { return callback(err); }
+						release.size = contentlength;
+						callback(null,release);
+					});
+				},callback);
 			});
 		},function(err,releases) {
 			distribution.releases = releases.flatten();

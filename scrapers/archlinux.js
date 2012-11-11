@@ -17,14 +17,23 @@ module.exports = function(callback) {
 		async.map(versions,function(version,callback) {
 			var isosurl = distributionurl+version+'/';
 			request.dom(isosurl,function(err,$) {
-				var releases = $('pre a').map(function(a) {
+				var urls = $('pre a').map(function(a) {
 					return a.attr('href');
-				}).compact().filter(function(url) {
-					return (/\.iso$/).test(url);
+				}).compact().filter(function(filename) {
+					return (/\.iso$/).test(filename);
 				}).map(function(filename) {
-					return {version:version,url:isosurl+filename};
+					return isosurl + filename;
 				});
-				callback(null,releases);
+				async.map(urls,function(url,callback) {
+					request.contentlength(url,function(err,contentLength) {
+						if (err) { return callback(err); }
+						callback(null,{
+							version: version,
+							url: url,
+							size: contentLength
+						});
+					});
+				},callback);
 			});
 		},function(err,releases) {
 			distribution.releases = releases.flatten();

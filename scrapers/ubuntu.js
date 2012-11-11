@@ -14,8 +14,20 @@ module.exports = function(callback) {
 		async.map(versions,function(version,callback) {
 			var versionurl = distributionurl+version+'/';
 			request.dom(versionurl,function(err,$) {
-				var releases = $('pre a').map(function(a) { return (/^.*\.iso$/).exec(a.attr('href')); }).compact().map(first).map(function(filename) { return {version: version,url:versionurl+filename}; });
-				callback(null,releases);
+				var releases = $('pre a').map(function(a) {
+					return a.attr('href');
+				}).compact().filter(function(filename) {
+					return (/\.iso$/).test(filename);
+				}).map(function(filename) {
+					return {version: version,url:versionurl+filename};
+				});
+				async.map(releases,function(release,callback) {
+					request.contentlength(release.url,function(err,contentlength) {
+						if (err) { return callback(err); }
+						release.size = contentlength;
+						callback(null,release);
+					});
+				},callback);
 			});
 		},function(err,releases) {
 			distribution.releases = releases.flatten();

@@ -1,7 +1,7 @@
 var request = require('request');
 var cheerio = require('cheerio');
 var async = require('async');
-
+var sugar = require('sugar');
 var cookieJar = request.jar();
 
 var request = request.defaults({
@@ -22,21 +22,44 @@ function requestBase(options,result) {
 			return;
 		}
 		response.url = options.url;
-		result(response,body);
+		result(null,response,body);
 	}
 }
 
 function requestDom(options,result) {
-	requestBase(options,function(response,body) {
+	requestBase(options,function(err,response,body) {
+		if (err) { return result(err); }
 		var $ = cheerio.load(body);
 		result(null,$,response);
 	});
 }
 
 function requestXmlDom(options,result) {
-	requestBase(options,function(response,body) {
+	requestBase(options,function(err,response,body) {
+		if (err) { return result(err); }
 		var $ = cheerio.load(body,{xmlMode: true});
 		result(null,$,response);
+	});
+}
+
+function requestContentLength(options,result) {
+	if (typeof options === 'string') {
+		options = { url: options };
+	}
+	var newOptions = { method: 'HEAD' };
+	Object.merge(newOptions,options);
+	requestBase(newOptions,function(err,response) {
+		if (err) { return result(err); }
+		var contentLength = response.headers['content-length'];
+		if (contentLength === undefined) {
+			result(null,contentLength);
+		}
+		try {
+			contentLength = parseInt(contentLength,10);
+		} catch(e) {
+			result(e);
+		}
+		result(null,contentLength);
 	});
 }
 
@@ -63,3 +86,4 @@ cheerio.prototype.mapFilter = function(f) {
 module.exports = requestBase;
 module.exports.dom = requestDom;
 module.exports.xmldom = requestXmlDom;
+module.exports.contentlength = requestContentLength;

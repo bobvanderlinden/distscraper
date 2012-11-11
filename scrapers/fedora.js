@@ -32,17 +32,27 @@ module.exports = function(callback) {
 				'/Live/x86_64/',
 				'/Fedora/i386/iso/',
 				'/Fedora/x86_64/iso/'
-			].map(function(subpath){return distributionurl+version+subpath;});
+			].map(function(subpath){
+				return distributionurl+version+subpath;
+			});
 
 			function requestISOs(versionurl,callback) {
 				request.dom(versionurl,function(err,$) {
 					if (err) { return callback(err); }
-					var isos = $('pre a').map(function(a) {
-						return (/^.*\.iso$/).exec(a.attr('href'));
-					}).compact().map(function(filename) {
+					var releases = $('pre a').map(function(a) {
+						return a.attr('href');
+					}).compact().filter(function(filename) {
+						return (/\.iso$/).test(filename);
+					}).map(function(filename) {
 						return {version: version,url:versionurl+filename};
 					});
-					callback(null,isos);
+					async.map(releases,function(release,callback) {
+						request.contentlength(release.url,function(err,contentlength) {
+							if (err) { return callback(err); }
+							release.size = contentlength;
+							callback(null,release);
+						});
+					},callback);
 				});
 			}
 
