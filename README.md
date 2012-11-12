@@ -1,6 +1,6 @@
 # DistScraper
 
-DistScaper retrieves where the various images (.iso files) are located for a number of Linux distributions. It is being used for DriveDroid to show a list of downloadable images.
+DistScaper retrieves where the various images (.iso files) are located for a number of Linux distributions. It is being used for [DriveDroid](https://play.google.com/store/apps/details?id=com.softwarebakery.drivedroid) to show a list of downloadable images.
 
 The distributions that are supported at the moment are:
 
