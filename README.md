@@ -26,3 +26,8 @@ To let distscaper only retrieve specified distributions, for example only Debian
 
     $ node index.js debian
 
+## Contribute
+
+To add new scrapers, look at the different scrapers that are already in place (under `scrapers/`). The output of a scraper should look like `scraper-output.json`.
+
+If you have a new or updated scraper, please do a pull request.

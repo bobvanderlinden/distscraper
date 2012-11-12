@@ -1,0 +1,12 @@
+// This file is an example of the output a scraper should generate
+{
+	"name": "Debian", // Name of distribution (required)
+	"url": "http://www.debian.org/", // URL to homepage of distribution (optional)
+	"releases": [ // List of images
+		{ "version": "6.0.6", // Version of the image (required)
+			"arch": "amd64",    // Supported architecture of the image (optional)
+			"size": 176160768,  // Filesize of the image (in bytes) (required)
+			"url": "http://cdimage.debian.org/debian-cd/6.0.6/amd64/iso-cd/debian-6.0.6-amd64-netinst.iso" // Full url to where the image is located (required)
+		}
+	]
+}
