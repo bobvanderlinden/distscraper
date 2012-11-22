@@ -9,6 +9,7 @@ The distributions that are supported at the moment are:
 * ArchLinux
 * OpenSUSE
 * Fedora
+* SliTaz
 
 ## Installation
 
