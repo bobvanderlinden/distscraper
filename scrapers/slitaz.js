@@ -31,6 +31,7 @@ module.exports = function(callback) {
 				}).map(function(filename) {
 					return {version: version.name,url:version.url+filename};
 				});
+
 				async.map(releases,function(release,callback) {
 					request.contentlength(release.url,function(err,contentlength) {
 						if (err) { return callback(err); }
@@ -40,6 +41,14 @@ module.exports = function(callback) {
 				},callback);
 			});
 		},function(err,releases) {
+			
+			// Hack to still have latest bootable stable version of SliTaz in distributionlist.
+			releases.push({
+				version: '4.0',
+				url: 'https://dl.dropbox.com/u/183064/slitaz-4.0.iso',
+				size: 36700160
+			});
+
 			distribution.releases = releases.flatten();
 			callback(null,distribution);
 		});
