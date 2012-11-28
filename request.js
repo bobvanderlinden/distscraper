@@ -50,6 +50,7 @@ function requestContentLength(options,result) {
 	Object.merge(newOptions,options);
 	requestBase(newOptions,function(err,response) {
 		if (err) { return result(err); }
+		if (response.statusCode < 200 || response.statusCode >= 300) { return result(null,null); }
 		var contentLength = response.headers['content-length'];
 		if (contentLength === undefined) {
 			result(null,contentLength);
