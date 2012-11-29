@@ -10,6 +10,8 @@ The distributions that are supported at the moment are:
 * OpenSUSE
 * Fedora
 * SliTaz
+* GeeXboX
+* Grml
 
 ## Installation
 
