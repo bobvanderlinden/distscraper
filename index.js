@@ -118,6 +118,7 @@ function getAllScrapers(callback) {
 	fs.readdir(scrapersPath,function(err,files) {
 		if (err) { return callback(err); }
 		files = files.map(function(file) { return path.join(scrapersPath,file); });
+		files.sort();
 		callback(null,files);
 	});
 }
