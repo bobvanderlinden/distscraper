@@ -28,12 +28,12 @@ convert -background none $TMP/fedora.svg ${RESIZE[@]} $DST/fedora.png
 
 # ArchLinux
 retrieve http://upload.wikimedia.org/wikipedia/en/a/ac/Archlinux-official-fullcolour.svg $TMP/archlinux.svg
-xml ed -d "//*[@id='g2809']" -d "//*[@id='g5326']" -d "//*[@id='text4418']" -d "//*[@id='text2634']" -d "//*[@id='text2638']" $TMP/archlinux.svg >| $TMP/archlinux_logo.svg
+xmlstarlet ed -d "//*[@id='g2809']" -d "//*[@id='g5326']" -d "//*[@id='text4418']" -d "//*[@id='text2634']" -d "//*[@id='text2638']" $TMP/archlinux.svg >| $TMP/archlinux_logo.svg
 convert -background none $TMP/archlinux_logo.svg -trim ${RESIZE[@]} $DST/archlinux.png
 
 # OpenSUSE
 retrieve http://upload.wikimedia.org/wikipedia/commons/d/d0/OpenSUSE_Logo.svg $TMP/opensuse.svg
-xml ed -d "//*[@id='path45']" -d "//*[@id='path43']" -d "//*[@id='path41']" -d "//*[@id='path39']" -d "//*[@id='path35']" -d "//*[@id='path33']" -d "//*[@id='path31']" -d "//*[@id='path29']" -d "//*[@id='path27']" $TMP/opensuse.svg >| $TMP/opensuse_logo.svg
+xmlstarlet ed -d "//*[@id='path45']" -d "//*[@id='path43']" -d "//*[@id='path41']" -d "//*[@id='path39']" -d "//*[@id='path35']" -d "//*[@id='path33']" -d "//*[@id='path31']" -d "//*[@id='path29']" -d "//*[@id='path27']" $TMP/opensuse.svg >| $TMP/opensuse_logo.svg
 convert -background none $TMP/opensuse_logo.svg -trim ${RESIZE[@]} $DST/opensuse.png
 
 #SliTaz
