@@ -55,3 +55,12 @@ convert -background none $TMP/geexbox.png -crop 91x65+0+0 -trim ${RESIZE[@]} $DS
 # grml
 retrieve http://distrowatch.com/images/yvzhuwbpy/grml.png $TMP/grml.png
 convert -background none $TMP/grml.png -crop 91x60+0+0 -trim ${RESIZE[@]} $DST/grml.png
+
+# FreeBSD
+retrieve http://upload.wikimedia.org/wikipedia/en/d/df/Freebsd_logo.svg $TMP/freebsd.svg
+xmlstarlet ed -d "//*[@id='g4795']" $TMP/freebsd.svg >| $TMP/freebsd_logo.svg
+convert -background none $TMP/freebsd_logo.svg -trim ${RESIZE[@]} $DST/freebsd.png
+
+# Gentoo
+retrieve http://upload.wikimedia.org/wikipedia/commons/4/48/Gentoo_Linux_logo_matte.svg $TMP/gentoo.svg
+convert -background none $TMP/gentoo.svg -trim ${RESIZE[@]} $DST/gentoo.png
