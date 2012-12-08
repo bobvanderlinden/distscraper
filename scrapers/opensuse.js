@@ -10,6 +10,7 @@ module.exports = function(callback) {
 			return (/^\d+\.\d+/).exec(a.attr('href'));
 		}).compact().map(first);
 		var distribution = {
+			id: 'opensuse',
 			name: 'OpenSUSE',
 			url: 'http://www.opensuse.org/'
 		};

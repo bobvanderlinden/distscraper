@@ -6,6 +6,7 @@ function first(a) { return a[0]; }
 module.exports = function(callback) {
 	request.dom('http://www.debian.org/distrib/netinst',function(err,$) {
 		var distribution = {
+			id: 'debian',
 			name: 'Debian',
 			url: 'http://www.debian.org/'
 		};

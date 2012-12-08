@@ -4,6 +4,7 @@ var sugar = require('sugar');
 
 module.exports = function(callback) {
 	var distribution = {
+		id: 'tails',
 		name: 'Tails',
 		url: 'https://tails.boum.org/',
 		releases: [{

@@ -1,5 +1,6 @@
 // This file is an example of the output a scraper should generate
 {
+	"id": "debian", // Unique lower-case, alphanumeric-characters-only identifier of the distribution (required)
 	"name": "Debian", // Name of distribution (required)
 	"url": "http://www.debian.org/", // URL to homepage of distribution (optional)
 	"releases": [ // List of images

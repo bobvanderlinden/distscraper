@@ -8,6 +8,7 @@ module.exports = function(callback) {
 	request.dom(distributionurl,function(err,$) {
 		var versions = $('table a').map(function(a) { return (/^\d+\.\d+/).exec(a.attr('href')); }).compact().map(first);
 		var distribution = {
+			id: 'freebsd',
 			name: 'FreeBSD',
 			url: 'http://www.freebsd.org/'
 		};

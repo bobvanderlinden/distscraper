@@ -10,6 +10,7 @@ module.exports = function(callback) {
 			return (/^\d+(\.\d+)*/).exec(a.attr('href'));
 		}).compact().map(first);
 		var distribution = {
+			id: 'archlinux',
 			name: 'Arch Linux',
 			url: 'http://www.archlinux.org/'
 		};

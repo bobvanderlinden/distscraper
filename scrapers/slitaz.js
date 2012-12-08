@@ -19,6 +19,7 @@ module.exports = function(callback) {
 			return { name: a.text(), url: distributionurl+a.attr('href') +'/' };
 		});
 		var distribution = {
+			id: 'slitaz',
 			name: 'SliTaz',
 			url: 'http://www.slitaz.org/'
 		};

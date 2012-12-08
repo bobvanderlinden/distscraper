@@ -8,6 +8,7 @@ module.exports = function(callback) {
 	request.dom(distributionurl,function(err,$) {
 		var versions = $('pre a').map(function(a) { return (/^\d+\.\d+/).exec(a.attr('href')); }).compact().map(first);
 		var distribution = {
+			id: 'ubuntu',
 			name: 'Ubuntu',
 			url: 'http://www.ubuntu.com/'
 		};

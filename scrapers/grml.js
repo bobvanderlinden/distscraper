@@ -25,6 +25,7 @@ module.exports = function(callback) {
 	var mainpage = 'http://grml.org/download/';
 	request.dom(mainpage,function(err,$) {
 		var distribution = {
+			id: 'grml',
 			name: 'Grml',
 			url: 'http://grml.org/'
 		};

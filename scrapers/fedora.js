@@ -10,6 +10,7 @@ module.exports = function(callback) {
 			return (/^\d+/).exec(a.attr('href'));
 		}).compact().map(first);
 		var distribution = {
+			id: 'fedora',
 			name: 'Fedora',
 			url: 'http://www.fedora.com/'
 		};

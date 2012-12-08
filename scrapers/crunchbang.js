@@ -16,6 +16,7 @@ module.exports = function(callback) {
 			};
 		});
 		var distribution = {
+			id: 'crunchbang',
 			name: 'Crunchbang',
 			url: 'http://crunchbang.org/'
 		};
