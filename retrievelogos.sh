@@ -68,3 +68,7 @@ convert -background none $TMP/freebsd_logo.svg -trim ${RESIZE[@]} $DST/freebsd.p
 # Gentoo
 retrieve http://upload.wikimedia.org/wikipedia/commons/4/48/Gentoo_Linux_logo_matte.svg $TMP/gentoo.svg
 convert -background none $TMP/gentoo.svg -trim ${RESIZE[@]} $DST/gentoo.png
+
+# XBMCbuntu
+retrieve http://upload.wikimedia.org/wikipedia/commons/5/5c/XBMC_Logo.svg $TMP/xbmcbuntu.svg
+convert -background none $TMP/xbmcbuntu.svg -trim ${RESIZE[@]} $DST/xbmcbuntu.png
