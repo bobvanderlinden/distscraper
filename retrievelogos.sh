@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o errexit
 
-SIZE=32
+SIZE=48
 GSIZE=${SIZE}x${SIZE}
 RESIZE=("-resize" "$GSIZE" "-gravity" "center" "-extent" "$GSIZE")
 
