@@ -12,7 +12,7 @@ module.exports = function(callback) {
 		var distribution = {
 			id: 'fedora',
 			name: 'Fedora',
-			url: 'http://www.fedora.com/'
+			url: 'http://fedoraproject.org/'
 		};
 
 		function requestISOs(version,isourl,callback) {
