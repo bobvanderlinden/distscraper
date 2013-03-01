@@ -76,3 +76,7 @@ convert -background none $TMP/xbmcbuntu.svg -trim ${RESIZE[@]} $DST/xbmcbuntu.pn
 # Linux Mint
 retrieve http://upload.wikimedia.org/wikipedia/commons/3/3f/Logo_Linux_Mint.png $TMP/linuxmint.png
 convert -background none $TMP/linuxmint.png -trim ${RESIZE[@]} $DST/linuxmint.png
+
+# RIPLinuX
+retrieve http://wiki.amahi.org/images/4/48/Riplinux-logo.png $TMP/riplinux.png
+convert -background none $TMP/riplinux.png -trim ${RESIZE[@]} $DST/riplinux.png
