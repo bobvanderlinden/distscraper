@@ -72,3 +72,7 @@ convert -background none $TMP/gentoo.svg -trim ${RESIZE[@]} $DST/gentoo.png
 # XBMCbuntu
 retrieve http://upload.wikimedia.org/wikipedia/commons/5/5c/XBMC_Logo.svg $TMP/xbmcbuntu.svg
 convert -background none $TMP/xbmcbuntu.svg -trim ${RESIZE[@]} $DST/xbmcbuntu.png
+
+# Linux Mint
+retrieve http://upload.wikimedia.org/wikipedia/commons/3/3f/Logo_Linux_Mint.png $TMP/linuxmint.png
+convert -background none $TMP/linuxmint.png -trim ${RESIZE[@]} $DST/linuxmint.png
