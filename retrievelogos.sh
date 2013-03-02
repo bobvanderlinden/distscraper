@@ -89,3 +89,8 @@ convert -background none $TMP/xubuntu.svg -trim ${RESIZE[@]} $DST/xubuntu.png
 retrieve http://upload.wikimedia.org/wikipedia/commons/b/b0/Kubuntu-logo-lucid.svg $TMP/kubuntu.svg
 xmlstarlet ed -N "svg=http://www.w3.org/2000/svg" -d "/svg:svg/svg:g/svg:g[not(@id='g3647')]" $TMP/kubuntu.svg >| $TMP/kubuntu_logo.svg
 convert -background none $TMP/kubuntu_logo.svg -trim ${RESIZE[@]} $DST/kubuntu.png
+
+# Lubuntu
+retrieve http://upload.wikimedia.org/wikipedia/commons/2/27/Lubuntu_logo.svg $TMP/lubuntu.svg
+xmlstarlet ed -N "svg=http://www.w3.org/2000/svg" -d "/svg:svg/*[not(position()=1)]" $TMP/lubuntu.svg >| $TMP/lubuntu_logo.svg
+convert -background none $TMP/lubuntu_logo.svg -trim ${RESIZE[@]} $DST/lubuntu.png
