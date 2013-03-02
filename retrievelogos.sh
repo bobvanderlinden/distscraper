@@ -80,3 +80,7 @@ convert -background none $TMP/linuxmint.png -trim ${RESIZE[@]} $DST/linuxmint.pn
 # RIPLinuX
 retrieve http://wiki.amahi.org/images/4/48/Riplinux-logo.png $TMP/riplinux.png
 convert -background none $TMP/riplinux.png -trim ${RESIZE[@]} $DST/riplinux.png
+
+# Xubuntu
+retrieve http://upload.wikimedia.org/wikipedia/commons/b/b1/Xubuntu_Logo2.svg $TMP/xubuntu.svg
+convert -background none $TMP/xubuntu.svg -trim ${RESIZE[@]} $DST/xubuntu.png
