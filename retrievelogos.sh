@@ -84,3 +84,8 @@ convert -background none $TMP/riplinux.png -trim ${RESIZE[@]} $DST/riplinux.png
 # Xubuntu
 retrieve http://upload.wikimedia.org/wikipedia/commons/b/b1/Xubuntu_Logo2.svg $TMP/xubuntu.svg
 convert -background none $TMP/xubuntu.svg -trim ${RESIZE[@]} $DST/xubuntu.png
+
+# Kubuntu
+retrieve http://upload.wikimedia.org/wikipedia/commons/b/b0/Kubuntu-logo-lucid.svg $TMP/kubuntu.svg
+xmlstarlet ed -N "svg=http://www.w3.org/2000/svg" -d "/svg:svg/svg:g/svg:g[not(@id='g3647')]" $TMP/kubuntu.svg >| $TMP/kubuntu_logo.svg
+convert -background none $TMP/kubuntu_logo.svg -trim ${RESIZE[@]} $DST/kubuntu.png
