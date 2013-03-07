@@ -8,7 +8,7 @@ RESIZE=("-resize" "$GSIZE" "-gravity" "center" "-extent" "$GSIZE")
 DST=logos
 mkdir -p $DST
 
-TMP=logos/tmp
+TMP=tmp/logos
 mkdir -p $TMP
 
 function retrieve()
