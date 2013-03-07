@@ -4,8 +4,8 @@ var sugar = require('sugar');
 
 module.exports = function(callback) {
 	var distribution = {
-		id: 'peppermintos',
-		name: 'Peppermint OS',
+		id: 'peppermint',
+		name: 'Peppermint',
 		url: 'http://www.peppermintos.com/'
 	};
 	// Specially crafted URLs for the new hybrid images.

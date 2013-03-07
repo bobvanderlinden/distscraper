@@ -95,6 +95,6 @@ retrieve http://upload.wikimedia.org/wikipedia/commons/2/27/Lubuntu_logo.svg $TM
 xmlstarlet ed -N "svg=http://www.w3.org/2000/svg" -d "/svg:svg/*[not(position()=1)]" $TMP/lubuntu.svg >| $TMP/lubuntu_logo.svg
 convert -background none $TMP/lubuntu_logo.svg -trim ${RESIZE[@]} $DST/lubuntu.png
 
-# Peppermint OS
-retrieve https://upload.wikimedia.org/wikipedia/commons/6/62/PEPPERMINT.png $TMP/peppermintos.png
-convert -background none $TMP/peppermintos.png -trim ${RESIZE[@]} $DST/peppermintos.png
+# Peppermint
+retrieve https://upload.wikimedia.org/wikipedia/commons/6/62/PEPPERMINT.png $TMP/peppermint.png
+convert -background none $TMP/peppermint.png -trim ${RESIZE[@]} $DST/peppermint.png
