@@ -98,3 +98,7 @@ convert -background none $TMP/lubuntu_logo.svg -trim ${RESIZE[@]} $DST/lubuntu.p
 # Peppermint
 retrieve https://upload.wikimedia.org/wikipedia/commons/6/62/PEPPERMINT.png $TMP/peppermint.png
 convert -background none $TMP/peppermint.png -trim ${RESIZE[@]} $DST/peppermint.png
+
+# Manjaro
+retrieve http://git.manjaro.org/manjaro-linux-graphics/manjaro-logo/blobs/raw/master/logo.png $TMP/manjaro.png
+convert -background none $TMP/manjaro.png -trim ${RESIZE[@]} $DST/manjaro.png
