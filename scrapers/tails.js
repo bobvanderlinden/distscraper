@@ -8,9 +8,9 @@ module.exports = function(callback) {
 		name: 'Tails',
 		url: 'https://tails.boum.org/',
 		releases: [{
-			version: '0.15',
+			version: '0.17',
 			arch: 'i386',
-			url: 'http://216.66.74.67/images/tails-i386-0.15.iso'
+			url: 'https://dl.dropbox.com/u/183064/tails-i386-0.17.iso'
 		}]
 	};
 	async.map(distribution.releases,function(release,callback) {
