@@ -16,7 +16,10 @@ function requestBase(options,result) {
 	}
 	q.push(options,handleResponse);
 	function handleResponse(err,response,body) {
-		if (err) { return result(err); }
+		if (err) {
+			err.url = options.url;
+			return result(err);
+		}
 		if (response.statusCode === 302) { // Handle redirects after POST
 			requestQueue.pushRequest({url:response.headers.location},handleResponse);
 			return;
