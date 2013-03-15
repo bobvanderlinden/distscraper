@@ -11,7 +11,7 @@ module.exports = function(callback) {
 	request.dom(distributionurl,function(err,$) {
 		var versions = getLinks($).filter(function(a) {
 			// From 3.0 all releases should have hybrid isos, however at the moment 4.0 does not, so filter those.
-			return !(['1.0','2.0'].find(a.text())) && (
+			return !(['1.0','2.0','4.0'].find(a.text())) && (
 				// The versions that are allowed (all x.x and rolling)
 				(/^\d+(\.\d+)+$/).test(a.text()) || ['rolling'].find(a.text())
 			);
@@ -42,6 +42,14 @@ module.exports = function(callback) {
 				},callback);
 			});
 		},function(err,releases) {
+			
+			// Hack to still have latest bootable stable version of SliTaz in distributionlist.
+			releases.push({
+				version: '4.0',
+				url: 'http://dl.dropbox.com/u/183064/slitaz-4.0.iso',
+				size: 36700160
+			});
+
 			distribution.releases = releases.flatten();
 			callback(null,distribution);
 		});
