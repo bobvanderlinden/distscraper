@@ -46,7 +46,7 @@ module.exports = function(callback) {
 			// Hack to still have latest bootable stable version of SliTaz in distributionlist.
 			releases.push({
 				version: '4.0',
-				url: 'http://dl.dropbox.com/u/183064/slitaz-4.0.iso',
+				url: 'http://softwarebakery.com/apps/drivedroid/distros/slitaz-4.0.iso',
 				size: 36700160
 			});
 
