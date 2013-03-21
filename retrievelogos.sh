@@ -102,3 +102,7 @@ convert -background none $TMP/peppermint.png -trim ${RESIZE[@]} $DST/peppermint.
 # Manjaro
 retrieve http://git.manjaro.org/manjaro-linux-graphics/manjaro-logo/blobs/raw/master/logo.png $TMP/manjaro.png
 convert -background none $TMP/manjaro.png -trim ${RESIZE[@]} $DST/manjaro.png
+
+# Kali Linux
+retrieve http://docs.kali.org/wp-content/uploads/2013/03/guy-tm.png $TMP/kalilinux.png
+convert -background none $TMP/kalilinux.png -trim ${RESIZE[@]} $DST/kalilinux.png
