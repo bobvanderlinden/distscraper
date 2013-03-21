@@ -56,10 +56,6 @@ convert -background none $TMP/geexbox.png -crop 91x65+0+0 -trim ${RESIZE[@]} $DS
 retrieve http://distrowatch.com/images/yvzhuwbpy/grml.png $TMP/grml.png
 convert -background none $TMP/grml.png -crop 91x60+0+0 -trim ${RESIZE[@]} $DST/grml.png
 
-# tails
-retrieve http://distrowatch.com/images/yvzhuwbpy/tails.png $TMP/tails.png
-convert -background none $TMP/tails.png -crop 91x65+0+0 -trim ${RESIZE[@]} $DST/tails.png
-
 # FreeBSD
 retrieve http://upload.wikimedia.org/wikipedia/en/d/df/Freebsd_logo.svg $TMP/freebsd.svg
 xmlstarlet ed -d "//*[@id='g4795']" $TMP/freebsd.svg >| $TMP/freebsd_logo.svg
