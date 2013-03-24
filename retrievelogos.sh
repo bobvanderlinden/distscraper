@@ -102,3 +102,7 @@ convert -background none $TMP/manjaro.png -trim ${RESIZE[@]} $DST/manjaro.png
 # Kali Linux
 retrieve http://docs.kali.org/wp-content/uploads/2013/03/guy-tm.png $TMP/kalilinux.png
 convert -background none $TMP/kalilinux.png -trim ${RESIZE[@]} $DST/kalilinux.png
+
+# Fuduntu
+retrieve http://www.fuduntu.org/images/logo.png $TMP/fuduntu.png
+convert -background none $TMP/fuduntu.png -crop 48x48+0+0 -trim ${RESIZE[@]} $DST/fuduntu.png
