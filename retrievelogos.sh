@@ -106,3 +106,7 @@ convert -background none $TMP/kalilinux.png -trim ${RESIZE[@]} $DST/kalilinux.pn
 # Fuduntu
 retrieve http://www.fuduntu.org/images/logo.png $TMP/fuduntu.png
 convert -background none $TMP/fuduntu.png -crop 48x48+0+0 -trim ${RESIZE[@]} $DST/fuduntu.png
+
+# Clonezilla
+retrieve http://upload.wikimedia.org/wikipedia/commons/6/6c/CZLogo2.png $TMP/clonezilla.png
+convert -background none $TMP/clonezilla.png -trim ${RESIZE[@]} $DST/clonezilla.png
