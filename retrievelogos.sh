@@ -110,3 +110,8 @@ convert -background none $TMP/fuduntu.png -crop 48x48+0+0 -trim ${RESIZE[@]} $DS
 # Clonezilla
 retrieve http://upload.wikimedia.org/wikipedia/commons/6/6c/CZLogo2.png $TMP/clonezilla.png
 convert -background none $TMP/clonezilla.png -trim ${RESIZE[@]} $DST/clonezilla.png
+
+# Parted Magic
+retrieve http://beefdrapes.partedmagic.com/source/pmagicons/pmagicons-1.0-noarch-1_pmagic.txz $TMP/pmagicons.txz
+mkdir -p $TMP/pmagicons && tar xfJ $TMP/pmagicons.txz -C $TMP/pmagicons > /dev/null
+cp $TMP/pmagicons/usr/share/icons/hicolor/${SIZE}x${SIZE}/apps/pmagic.png $DST/partedmagic.png
