@@ -14,13 +14,13 @@ module.exports = function(callback) {
 			url: 'http://www.lubuntu.net/'
 		};
 		async.map(versions,function(version,callback) {
-			var versionurl = url.resolve(distributionurl,version+'/release/');
+			var versionurl = url.resolve(distributionurl,version+'/release/').trim();
 			request.dom(versionurl,function(err,$) {
 				var releases = $('a').map(function(a) {
-					return a.attr('href');
+					return a.attr('href').trim();
 				}).compact().filter(function(filename) {
 					return (/\.iso$/).test(filename);
-				}).map(function(filename) {
+				}).unique().map(function(filename) {
 					return {version: version,url:versionurl+filename};
 				});
 				async.map(releases,function(release,callback) {
