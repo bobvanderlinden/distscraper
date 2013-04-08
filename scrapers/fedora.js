@@ -30,6 +30,7 @@ module.exports = function(callback) {
 		async.map(versions,function(version,callback) {
 			var versionurls = [
 				'/Live/i686/',
+				'/Live/i386/',
 				'/Live/x86_64/',
 				'/Fedora/i386/iso/',
 				'/Fedora/x86_64/iso/'
@@ -45,7 +46,11 @@ module.exports = function(callback) {
 					}).compact().filter(function(filename) {
 						return (/\.iso$/).test(filename);
 					}).map(function(filename) {
-						return {version: version,url:versionurl+filename};
+						return {
+							version: version,
+							url:versionurl+filename,
+							arch: /i686|i386|x86_64/.exec(filename)[0]
+						};
 					});
 					async.map(releases,function(release,callback) {
 						request.contentlength(release.url,function(err,contentlength) {
