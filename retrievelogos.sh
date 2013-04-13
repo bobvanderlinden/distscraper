@@ -115,3 +115,7 @@ convert -background none $TMP/clonezilla.png -trim ${RESIZE[@]} $DST/clonezilla.
 retrieve http://beefdrapes.partedmagic.com/source/pmagicons/pmagicons-1.0-noarch-1_pmagic.txz $TMP/pmagicons.txz
 mkdir -p $TMP/pmagicons && tar xfJ $TMP/pmagicons.txz -C $TMP/pmagicons > /dev/null
 cp $TMP/pmagicons/usr/share/icons/hicolor/${SIZE}x${SIZE}/apps/pmagic.png $DST/partedmagic.png
+
+# Linux Lite
+retrieve http://distrowatch.com/images/yvzhuwbpy/lite.png $TMP/linuxlite.png
+convert -background none $TMP/linuxlite.png -crop 90x62+0+0 -trim ${RESIZE[@]} $DST/linuxlite.png
