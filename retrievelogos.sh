@@ -119,3 +119,7 @@ cp $TMP/pmagicons/usr/share/icons/hicolor/${SIZE}x${SIZE}/apps/pmagic.png $DST/p
 # Linux Lite
 retrieve  http://www.linuxliteos.com/images/linux-lite-logo-360x360.png $TMP/linuxlite.png
 convert -background none $TMP/linuxlite.png -trim ${RESIZE[@]} $DST/linuxlite.png
+
+# GParted
+retrieve http://upload.wikimedia.org/wikipedia/commons/7/71/Scalable_gparted.svg $TMP/gparted.svg
+convert -background none $TMP/gparted.svg -trim ${RESIZE[@]} $DST/gparted.png
