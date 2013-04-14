@@ -117,5 +117,5 @@ mkdir -p $TMP/pmagicons && tar xfJ $TMP/pmagicons.txz -C $TMP/pmagicons > /dev/n
 cp $TMP/pmagicons/usr/share/icons/hicolor/${SIZE}x${SIZE}/apps/pmagic.png $DST/partedmagic.png
 
 # Linux Lite
-retrieve http://distrowatch.com/images/yvzhuwbpy/lite.png $TMP/linuxlite.png
-convert -background none $TMP/linuxlite.png -crop 90x62+0+0 -trim ${RESIZE[@]} $DST/linuxlite.png
+retrieve  http://www.linuxliteos.com/images/linux-lite-logo-360x360.png $TMP/linuxlite.png
+convert -background none $TMP/linuxlite.png -trim ${RESIZE[@]} $DST/linuxlite.png
