@@ -123,3 +123,7 @@ convert -background none $TMP/linuxlite.png -trim ${RESIZE[@]} $DST/linuxlite.pn
 # GParted
 retrieve http://upload.wikimedia.org/wikipedia/commons/7/71/Scalable_gparted.svg $TMP/gparted.svg
 convert -background none $TMP/gparted.svg -trim ${RESIZE[@]} $DST/gparted.png
+
+# FreeDOS
+retrieve http://www.freedos.org/images/logos/fdfish-color-plain.svg $TMP/freedos.svg
+convert -background none $TMP/freedos.svg -trim ${RESIZE[@]} $DST/freedos.png
