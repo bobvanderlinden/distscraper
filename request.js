@@ -29,6 +29,13 @@ function requestBase(options,result) {
 	}
 }
 
+function requestText(options,result) {
+	requestBase(options,function(err,response,body) {
+		if (err) { return result(err); }
+		result(null,body);
+	});
+}
+
 function requestDom(options,result) {
 	requestBase(options,function(err,response,body) {
 		if (err) { return result(err); }
@@ -88,6 +95,7 @@ cheerio.prototype.mapFilter = function(f) {
 };
 
 module.exports = requestBase;
+module.exports.text = requestText;
 module.exports.dom = requestDom;
 module.exports.xmldom = requestXmlDom;
 module.exports.contentlength = requestContentLength;
