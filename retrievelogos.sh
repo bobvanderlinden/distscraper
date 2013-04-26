@@ -127,3 +127,7 @@ convert -background none $TMP/gparted.svg -trim ${RESIZE[@]} $DST/gparted.png
 # FreeDOS
 retrieve http://www.freedos.org/images/logos/fdfish-color-plain.svg $TMP/freedos.svg
 convert -background none $TMP/freedos.svg -trim ${RESIZE[@]} $DST/freedos.png
+
+# MemTest86+
+retrieve http://softwarebakery.com/apps/drivedroid/distros/memtest86plus/logo.svg $TMP/memtest86plus.svg
+convert -background none $TMP/memtest86plus.svg -trim ${RESIZE[@]} $DST/memtest86plus.png
