@@ -135,3 +135,7 @@ convert -background none $TMP/memtest86plus.svg -trim ${RESIZE[@]} $DST/memtest8
 # Trisquel
 retrieve http://www.gnu.org/graphics/trisquel/trisquel.svg $TMP/trisquel.svg
 convert -background none $TMP/trisquel.svg -trim ${RESIZE[@]} $DST/trisquel.png
+
+# Tiny Core Linux
+retrieve http://tinycore.linuxfreedom.com/images/TinycoreLogo.png $TMP/tinycorelinux.png
+convert -background none $TMP/tinycorelinux.png -trim ${RESIZE[@]} $DST/tinycorelinux.png
