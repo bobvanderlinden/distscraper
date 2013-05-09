@@ -131,3 +131,7 @@ convert -background none $TMP/freedos.svg -trim ${RESIZE[@]} $DST/freedos.png
 # MemTest86+
 retrieve http://softwarebakery.com/apps/drivedroid/distros/memtest86plus/logo.svg $TMP/memtest86plus.svg
 convert -background none $TMP/memtest86plus.svg -trim ${RESIZE[@]} $DST/memtest86plus.png
+
+# Trisquel
+retrieve http://www.gnu.org/graphics/trisquel/trisquel.svg $TMP/trisquel.svg
+convert -background none $TMP/trisquel.svg -trim ${RESIZE[@]} $DST/trisquel.png
