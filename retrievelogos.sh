@@ -139,3 +139,8 @@ convert -background none $TMP/trisquel.svg -trim ${RESIZE[@]} $DST/trisquel.png
 # Tiny Core Linux
 retrieve http://tinycore.linuxfreedom.com/images/TinycoreLogo.png $TMP/tinycorelinux.png
 convert -background none $TMP/tinycorelinux.png -trim ${RESIZE[@]} $DST/tinycorelinux.png
+
+# Mageia
+retrieve http://www.mageia.org/g/media/logo/mageia-2013.svg $TMP/mageia.svg
+xmlstarlet ed -N "svg=http://www.w3.org/2000/svg" -d "//*[@id='path4687-7-56-1-0-2-2-7']" -d "//*[@id='path4687-7-56-1-8']" -d "//*[@id='path4687-7-56-1-0-55']" -d "//*[@id='path4687-7-56-1-0-6-7']" -d "//*[@id='rect4708-59-5-7-0']" -d "//*[@id='path9360-1']" -d "//*[@id='path4687-7-56-1-8-5']" $TMP/mageia.svg >| $TMP/mageia_logo.svg
+convert -background none $TMP/mageia_logo.svg -trim ${RESIZE[@]} $DST/mageia.png
