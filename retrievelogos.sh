@@ -148,3 +148,7 @@ convert -background none $TMP/mageia_logo.svg -trim ${RESIZE[@]} $DST/mageia.png
 # ophcrack
 retrieve http://ophcrack.sourceforge.net/logo.png $TMP/ophcrack.png
 convert -background none $TMP/ophcrack.png -trim ${RESIZE[@]} $DST/ophcrack.png
+
+# RebeccaBlackOS
+retrieve http://softwarebakery.com/apps/drivedroid/files/rebeccablackos.png $TMP/rebeccablackos.png
+convert -background none $TMP/rebeccablackos.png -trim ${RESIZE[@]} $DST/rebeccablackos.png
