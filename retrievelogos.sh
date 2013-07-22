@@ -152,3 +152,7 @@ convert -background none $TMP/ophcrack.png -trim ${RESIZE[@]} $DST/ophcrack.png
 # RebeccaBlackOS
 retrieve http://softwarebakery.com/apps/drivedroid/files/rebeccablackos.png $TMP/rebeccablackos.png
 convert -background none $TMP/rebeccablackos.png -trim ${RESIZE[@]} $DST/rebeccablackos.png
+
+# ZorinOS
+retrieve http://c.fsdn.com/allura/p/zorin-os/icon $TMP/zorinos.png
+convert -background none $TMP/zorinos.png -trim ${RESIZE[@]} $DST/zorinos.png
