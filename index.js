@@ -148,7 +148,7 @@ async.waterfall([
 	loadScrapers,
 	scrape
 ],function(err,distributions) {
-	if (err) { console.error(err); }
+	if (err) { console.error(err); throw err; }
 	console.log(JSON.stringify(distributions.compact()));
 
 	var errors = validateDistributions(distributions);
