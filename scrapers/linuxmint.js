@@ -4,48 +4,43 @@ var sugar = require('sugar');
 
 function first(a) { return a[0]; }
 module.exports = function(callback) {
-	var distributionurl = 'http://www.linuxmint.com/download.php';
+	var distributionurl = 'http://mirrors.kernel.org/linuxmint/stable/';
 	request.dom(distributionurl,function(err,$) {
+		var versions = $('pre a').map(function(a) {
+			return (/^\d+(\.\d+)*/).exec(a.attr('href'));
+		}).compact().map(first);
 		var distribution = {
 			id: 'linuxmint',
 			name: 'Linux Mint',
 			url: 'http://www.linuxmint.com/'
 		};
-		var editions = $('.sponsor-table a')
-			.map(function(a) { return (/.*edition\.php.*/).exec(a.attr('href')); })
-			.compact()
-			.map(first);
-		async.map(editions,function(edtitionurl,callback) {
-			request.dom(edtitionurl,function(err,$) {
-				if (err) { return callback(err); }
-				// Might be useful some day to get md5
-				function getValue(str) {
-					return $('.sponsor-table tr th:contains("' + str + '"):first')
-						.next()
-						.text();
-				}
 
-				var mirrors = $('.sponsor-table a').map(function(a) {
+		async.map(versions,function(version,callback) {
+			var isosurl = distributionurl+version+'/';
+			request.dom(isosurl,function(err,$) {
+				var urls = $('pre a').map(function(a) {
 					return a.attr('href');
-				}).filter(function(url) {
-					return /\.iso$/.test(url);
+				}).compact().filter(function(filename) {
+					return (/\.iso$/).test(filename);
+				}).map(function(filename) {
+					return isosurl + filename;
 				});
-
-				var url = mirrors[0];
-				var release = {
-					version: /-(\d+(\.\d+)*)(\.|-)/.exec(url)[1],
-					url: url,
-					arch: /-(32bit|64bit)(\.|-)/.exec(url)[1]
-				};
-				request.contentlength(release.url,function(err,contentlength) {
-					if (err) { return callback(err); }
-					release.size = contentlength;
-					callback(null,release);
-				});
+				async.map(urls,function(url,callback) {
+					request.contentlength(url,function(err,contentLength) {
+						if (err) { return callback(err); }
+						var release = {
+							version: version,
+							url: url,
+							size: contentLength
+						};
+						var archMatch = /[-\.](32bit|64bit)[-\.]/.exec(release.url);
+						if (archMatch) { release.arch = archMatch[1]; }
+						callback(null,release);
+					});
+				},callback);
 			});
 		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases;
+			distribution.releases = releases.flatten();
 			callback(null,distribution);
 		});
 	});
