@@ -178,6 +178,7 @@ function validateDistribution(distro) {
 			pushError('No releases');
 		}
 		distro.releases.forEach(function(release) {
+			if (!release) { pushError('Release is null'); return; }
 			if (typeof release !== 'object') { pushError('Release is not an object'); return; }
 			if (!release.url) { pushError('Release does not have an url'); }
 			if (!release.size) { pushError('Release "'+release.url+'" does not have a size'); }
