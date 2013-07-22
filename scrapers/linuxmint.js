@@ -17,6 +17,7 @@ module.exports = function(callback) {
 			.map(first);
 		async.map(editions,function(edtitionurl,callback) {
 			request.dom(edtitionurl,function(err,$) {
+				if (err) { return callback(err); }
 				// Might be useful some day to get md5
 				function getValue(str) {
 					return $('.sponsor-table tr th:contains("' + str + '"):first')
@@ -43,6 +44,7 @@ module.exports = function(callback) {
 				});
 			});
 		},function(err,releases) {
+			if (err) { return callback(err); }
 			distribution.releases = releases;
 			callback(null,distribution);
 		});
