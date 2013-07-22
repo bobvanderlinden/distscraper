@@ -156,3 +156,8 @@ convert -background none $TMP/rebeccablackos.png -trim ${RESIZE[@]} $DST/rebecca
 # ZorinOS
 retrieve http://c.fsdn.com/allura/p/zorin-os/icon $TMP/zorinos.png
 convert -background none $TMP/zorinos.png -trim ${RESIZE[@]} $DST/zorinos.png
+
+# UberStudent
+retrieve http://softwarebakery.com/apps/drivedroid/files/uberstudent-logo.svg $TMP/uberstudent.svg
+convert -background none $TMP/uberstudent.svg -trim ${RESIZE[@]} $DST/uberstudent.png
+
