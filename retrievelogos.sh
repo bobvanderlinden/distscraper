@@ -161,3 +161,6 @@ convert -background none $TMP/zorinos.png -trim ${RESIZE[@]} $DST/zorinos.png
 retrieve http://softwarebakery.com/apps/drivedroid/files/uberstudent-logo.svg $TMP/uberstudent.svg
 convert -background none $TMP/uberstudent.svg -trim ${RESIZE[@]} $DST/uberstudent.png
 
+# Voyage Linux
+retrieve http://softwarebakery.com/apps/drivedroid/files/voyagelinux.png $TMP/voyagelinux.png
+convert -background none $TMP/voyagelinux.png -trim ${RESIZE[@]} $DST/voyagelinux.png
