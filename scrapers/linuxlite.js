@@ -32,7 +32,7 @@ module.exports = function(callback) {
 				}).filter(function(file) {
 					return /\.iso$/.test(file.url);
 				}).map(function(file) {
-					file.arch = /(32bit|i386|i486|i686|amd64)/.exec(file.url)[0];
+					file.arch = /(32bit|64bit|i386|i486|i686|amd64)/.exec(file.url)[0];
 					return file;
 				});
 				async.map(files,function(file,callback) {
