@@ -10,7 +10,7 @@ module.exports = function(callback) {
 		name: 'Parted Magic',
 		url: 'http://partedmagic.com/'
 	};
-	var url = 'http://sourceforge.net/projects/partedmagic/files/partedmagic/';
+	var url = 'http://sourceforge.net/projects/partedmagic/files/Stable/';
 	request.dom(url,function(err,$) {
 		if (err) { return callback(err); }
 		var versions = $('th[headers=files_name_h] a.name').map(function(a) {
