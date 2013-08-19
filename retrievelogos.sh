@@ -164,3 +164,8 @@ convert -background none $TMP/uberstudent.svg -trim ${RESIZE[@]} $DST/uberstuden
 # Voyage Linux
 retrieve http://softwarebakery.com/apps/drivedroid/files/voyagelinux.png $TMP/voyagelinux.png
 convert -background none $TMP/voyagelinux.png -trim ${RESIZE[@]} $DST/voyagelinux.png
+
+# elementary OS
+retrieve https://upload.wikimedia.org/wikipedia/commons/d/db/Elementary_logo.svg $TMP/elementaryos.svg
+convert -background none $TMP/elementaryos.svg -trim ${RESIZE[@]} $DST/elementaryos.png
+
