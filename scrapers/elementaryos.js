@@ -14,13 +14,13 @@ module.exports = function(callback) {
 					url: URL.resolve(url,a.attr('href')),
 					name: a.text().replace(/\s+/g,'')
 				};
-			}).filter(function(link) {
-				return link.url && /\.iso$/.test(link.name) && /\/download$/.test(link.url);
-			}).map(function(file) {
+			}).filter(function(file) {
+				if (!file.url || !/\.iso$/.test(file.name)) { return false; }
+				file.url = file.url.replace(/\/download$/,'');
 				file.arch = /i\d86|amd64/.exec(file.url)[0];
 				var versionMatch = /(\d{4})(\d{2})(\d{2})/.exec(file.name);
 				file.version = versionMatch[1]+'.'+versionMatch[2]+'.'+versionMatch[3];
-				return file;
+				return true;
 			});
 		async.map(files,function(file,callback) {
 			request.contentlength(file.url,function(err,contentLength) {
