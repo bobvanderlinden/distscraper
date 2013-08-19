@@ -16,7 +16,9 @@ module.exports = function(callback) {
 				};
 			}).filter(function(file) {
 				if (!file.url || !/\.iso$/.test(file.name)) { return false; }
-				file.url = file.url.replace(/\/download$/,'');
+				file.url = file.url
+					.replace(/^https/,'http')
+					.replace(/\/download$/,'');
 				file.arch = /i\d86|amd64/.exec(file.url)[0];
 				var versionMatch = /(\d{4})(\d{2})(\d{2})/.exec(file.name);
 				file.version = versionMatch[1]+'.'+versionMatch[2]+'.'+versionMatch[3];
