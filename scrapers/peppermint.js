@@ -1,31 +1,38 @@
 var request = require('../request.js');
 var async = require('async');
 var sugar = require('sugar');
+var URL = require('url');
 
-module.exports = function(callback) {
-	var distribution = {
-		id: 'peppermint',
-		name: 'Peppermint',
-		url: 'http://www.peppermintos.com/'
-	};
-	// Specially crafted URLs for the new hybrid images.
-	// TODO: Scrape for future versions
-	var files = [
-		{ url: 'http://peppermintos.info/ddroid/Peppermint-3-20130304-amd64.iso',
-		  arch: 'amd64',
-		  version: '3' },
-		{ url: 'http://peppermintos.info/ddroid/Peppermint-3-20130304-i386.iso',
-		  arch: 'i386',
-		  version: '3' }
-	];
-	async.map(files,function(file,callback) {
-		request.contentlength(file.url,function(err,contentlength) {
-			if (err) { return callback(err); }
-			file.size = contentlength;
-			callback(null,file);
+module.exports = function(cb) {
+	request.dom('http://peppermintos.com/',function(err,$,response) {
+		if (err) { return cb(err); }
+		async.map($('a').map(function(a) {
+				a = $(a);
+				return URL.resolve(response.url,a.attr('href'));
+			}).map(function(url) {
+				var match = /Peppermint-(\d+-\d+)-(\w+)\.iso$/.exec(url);
+				if (!match) { return null; }
+				return {
+					url: url,
+					version: match[1].replace('-','.'),
+					arch: match[2]
+				};
+			}).compact(),
+		function(release,cb) {
+			request.contentlength(release.url,function(err,contentlength) {
+				if (err) { return cb(err); }
+				release.size = contentlength;
+				cb(null,release);
+			});
+		},
+		function(err,releases) {
+			if (err) { return cb(err); }
+			cb(null,{
+				id: 'peppermint',
+				name: 'Peppermint',
+				url: 'http://www.peppermintos.com/',
+				releases: releases
+			});
 		});
-	},function(err,files) {
-		distribution.releases = files;
-		callback(null,distribution);
 	});
 };
