@@ -11,16 +11,16 @@ module.exports = function(callback) {
 			.map(function(a) {
 				a = $(a);
 				return {
-					url: URL.resolve(url,a.attr('href')),
-					name: a.text().replace(/\s+/g,'')
+					url: URL.resolve(url,a.attr('href'))
 				};
 			}).filter(function(file) {
-				if (!file.url || !/\.iso$/.test(file.name)) { return false; }
+				if (!file.url) { return false; }
 				file.url = file.url
 					.replace(/^https/,'http')
 					.replace(/\/download$/,'');
+				if (!/\.iso$/.test(file.url)) { return false; }
 				file.arch = /i\d86|amd64/.exec(file.url)[0];
-				var versionMatch = /(\d{4})(\d{2})(\d{2})/.exec(file.name);
+				var versionMatch = /(\d{4})(\d{2})(\d{2})/.exec(file.url);
 				file.version = versionMatch[1]+'.'+versionMatch[2]+'.'+versionMatch[3];
 				return true;
 			});
