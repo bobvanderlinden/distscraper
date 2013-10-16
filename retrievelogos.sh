@@ -169,3 +169,5 @@ convert -background none $TMP/voyagelinux.png -trim ${RESIZE[@]} $DST/voyagelinu
 retrieve https://upload.wikimedia.org/wikipedia/commons/d/db/Elementary_logo.svg $TMP/elementaryos.svg
 convert -background none $TMP/elementaryos.svg -trim ${RESIZE[@]} $DST/elementaryos.png
 
+# BBQLinux
+retrieve https://raw.github.com/bbqlinux/bbqlinux-installer/master/src/usr/share/bbqlinux-installer/bbqlinux_icon_blue_48x48.png $DST/bbqlinux.png
