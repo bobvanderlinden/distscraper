@@ -171,3 +171,7 @@ convert -background none $TMP/elementaryos.svg -trim ${RESIZE[@]} $DST/elementar
 
 # BBQLinux
 retrieve https://raw.github.com/bbqlinux/bbqlinux-installer/master/src/usr/share/bbqlinux-installer/bbqlinux_icon_blue_48x48.png $DST/bbqlinux.png
+
+# alphaOS
+retrieve https://bitbucket-assetroot.s3.amazonaws.com/c/photos/2013/Sep/28/alphaos-logo-878642709-8_avatar.png $TMP/alphaos.png
+convert -background none $TMP/alphaos.png -trim ${RESIZE[@]} $DST/alphaos.png
