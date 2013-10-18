@@ -1,8 +1,7 @@
-var request = require('../request.js');
 var async = require('async');
 var sugar = require('sugar');
 
-module.exports = function(callback) {
+module.exports = function(request,callback) {
 	var distributionurl = 'http://crunchbang.org/download/get/';
 	request.dom(distributionurl,function(err,$) {
 		if (err) { return callback(err); }

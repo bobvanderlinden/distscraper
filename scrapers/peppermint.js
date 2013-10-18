@@ -1,9 +1,8 @@
-var request = require('../request.js');
 var async = require('async');
 var sugar = require('sugar');
 var URL = require('url');
 
-module.exports = function(cb) {
+module.exports = function(request,cb) {
 	request.dom('http://peppermintos.com/',function(err,$,response) {
 		if (err) { return cb(err); }
 		async.map($('a').map(function(a) {

@@ -1,4 +1,3 @@
-var request = require('../request.js');
 var async = require('async');
 var sugar = require('sugar');
 var URL = require('url');
@@ -9,7 +8,7 @@ function doubledigit(d) {
 	while (s.length < 2) { s = '0' + s; }
 	return s;
 }
-module.exports = function(callback) {
+module.exports = function(request,callback) {
 	var distribution = {
 		id: 'rebeccablackos',
 		name: 'RebeccaBlackOS',

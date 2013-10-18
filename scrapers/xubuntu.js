@@ -1,10 +1,9 @@
-var request = require('../request.js');
 var async = require('async');
 var sugar = require('sugar');
 var url = require('url');
 
 function first(a) { return a[0]; }
-module.exports = function(callback) {
+module.exports = function(request,callback) {
 	var distributionurl = 'http://cdimage.ubuntu.com/xubuntu/releases/';
 	request.dom(distributionurl,function(err,$) {
 		var versions = $('a').map(function(a) { return (/^\d+\.\d+/).exec(a.attr('href')); }).compact().map(first);

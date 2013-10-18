@@ -1,9 +1,8 @@
-var request = require('../request.js');
 var async = require('async');
 var sugar = require('sugar');
 
 function first(a) { return a[0]; }
-module.exports = function(callback) {
+module.exports = function(request,callback) {
 	var distributionurl = 'http://mirrors.kernel.org/gentoo/releases/';
 	request.dom(distributionurl,function(err,$) {
 		var arches = ['x86','amd64'];

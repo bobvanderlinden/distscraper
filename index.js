@@ -2,6 +2,7 @@ var repl = require('repl');
 var fs = require('fs');
 var async = require('async');
 var path = require('path');
+var request = require('./request');
 function debug() {
 	//console.log.apply(console,arguments);
 }
@@ -138,7 +139,7 @@ function loadScrapers(scrapers,callback) {
 
 function scrape(scrapers,callback) {
 	async.map(scrapers,function(scraper,callback) {
-		scraper(callback);
+		scraper(request,callback);
 	},callback);
 }
 

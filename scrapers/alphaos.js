@@ -1,9 +1,8 @@
-var request = require('../request.js');
 var async = require('async');
 var sugar = require('sugar');
 var URL = require('url');
 
-module.exports = function(cb) {
+module.exports = function(request,cb) {
 	var url = 'http://sourceforge.net/projects/alphaos/files/';
 	request.dom(url,function(err,$,response) {
 		if (err) { return cb(err); }

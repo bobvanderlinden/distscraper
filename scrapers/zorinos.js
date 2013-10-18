@@ -1,8 +1,7 @@
-var request = require('../request.js');
 var async = require('async');
 var sugar = require('sugar');
 
-module.exports = function(callback) {
+module.exports = function(request,callback) {
 	var distributionurl = 'http://distro.ibiblio.org/zorin/';
 	request.dom(distributionurl,function(err,$) {
 		var versions = $('a').map(function(a) {

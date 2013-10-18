@@ -1,9 +1,8 @@
-var request = require('../request.js');
 var async = require('async');
 var sugar = require('sugar');
 var URL = require('url');
 
-module.exports = function(cb) {
+module.exports = function(request,cb) {
 	async.parallel([
 		retrieveReleases('http://alpha.voyage.hk/download/ISO/','x86'),
 		retrieveReleases('http://alpha.voyage.hk/download/ISO/amd64/','amd64')

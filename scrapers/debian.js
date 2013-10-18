@@ -1,9 +1,8 @@
-var request = require('../request.js');
 var async = require('async');
 var sugar = require('sugar');
 
 function first(a) { return a[0]; }
-module.exports = function(callback) {
+module.exports = function(request,callback) {
 	request.dom('http://www.debian.org/distrib/netinst',function(err,$) {
 		var distribution = {
 			id: 'debian',

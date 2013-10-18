@@ -1,10 +1,9 @@
-var request = require('../request.js');
 var async = require('async');
 var sugar = require('sugar');
 var URL = require('url');
 
 function first(a) { return a[0]; }
-module.exports = function(callback) {
+module.exports = function(request,callback) {
 	var distribution = {
 		id: 'clonezilla',
 		name: 'Clonezilla',
