@@ -7,20 +7,36 @@ var program = require('commander');
 
 var scrapers = [];
 
-function includeRepository(name) {
-	fs.readdirSync(name).map(function(scraperName) {
-		return path.join(name,scraperName);
+function includeDirectory(directoryPath) {
+	fs.readdirSync(directoryPath).map(function(scraperName) {
+		return path.join(directoryPath,scraperName);
 	}).forEach(includeScraper);
 }
 
-function includeScraper(name) {
-	scrapers.push(require('./' + name));
+function includeScraper(scraperPath) {
+	scrapers.push(require('./' + scraperPath));
 }
 
 program
-	.option('-r, --repository <repository>', 'Include repository',includeRepository)
-	.option('-s, --scraper <scraper>', 'Include scraper',includeScraper)
+	.option('-d, --directory <path>', 'Include directory of scrapers',includeDirectory)
+	.option('-s, --scraper <path>', 'Include specific scraper',includeScraper)
+	.option('-o, --output <outputdir>', 'Output directory','out')
 	.parse(process.argv);
+
+if (!program.directory || !program.scraper) {
+	includeDirectory('scrapers');
+}
+
+var repositoryDefinitions = [
+	{
+		name: 'main',
+		filter: function(distribution) { return distribution.tags.indexOf('hybrid') >= 0; }
+	},
+	{
+		name: 'nonhybrid',
+		filter: function(distribution) { return distribution.tags.indexOf('nonhybrid') >= 0; }
+	}
+];
 
 function scrape(scrapers,callback) {
 	async.map(scrapers,function(scraper,callback) {
@@ -30,13 +46,32 @@ function scrape(scrapers,callback) {
 
 scrape(scrapers, function(err,distributions) {
 	if (err) { console.error(err); throw err; }
-	process.stdout.write(JSON.stringify(distributions.compact()));
 
 	var errors = validateDistributions(distributions);
 	if (errors.length > 0) {
 		console.error(errors);
 		process.exit(1);
+		return;
 	}
+
+	var repositories = repositoryDefinitions.map(function(repositoryDefinition) {
+		return {
+			name: repositoryDefinition.name,
+			distributions: distributions.filter(repositoryDefinition.filter.bind(repositoryDefinition))
+		};
+	});
+
+	async.forEach(repositories, function(repository,cb) {
+		var repositoryPath = path.join(program.output, repository.name + '.json');
+		fs.writeFile(repositoryPath, JSON.stringify(repository.distributions), cb);
+	},function(err) {
+		if (err) {
+			console.error(err);
+			process.exit(1);
+			return;
+		}
+		process.exit(0);
+	});
 });
 
 function validateDistributions(distributions) {

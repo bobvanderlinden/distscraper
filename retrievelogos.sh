@@ -175,3 +175,8 @@ retrieve https://raw.github.com/bbqlinux/bbqlinux-installer/master/src/usr/share
 # alphaOS
 retrieve https://bitbucket-assetroot.s3.amazonaws.com/c/photos/2013/Sep/28/alphaos-logo-878642709-8_avatar.png $TMP/alphaos.png
 convert -background none $TMP/alphaos.png -trim ${RESIZE[@]} $DST/alphaos.png
+
+# SystemRescueCD
+retrieve https://upload.wikimedia.org/wikipedia/commons/9/94/System-rescue-cd-logo-new.svg $TMP/systemrescuecd.svg
+xmlstarlet ed -N "svg=http://www.w3.org/2000/svg" -d "//*[@id='text2837']" -d "//*[@id='text2831']" $TMP/systemrescuecd.svg >| $TMP/systemrescuecd_logo.svg
+convert -background none $TMP/systemrescuecd_logo.svg -trim ${RESIZE[@]} $DST/systemrescuecd.png
