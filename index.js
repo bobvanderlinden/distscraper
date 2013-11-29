@@ -4,7 +4,10 @@ var async = require('async');
 var path = require('path');
 var request = require('./request');
 var program = require('commander');
+var charm = require('charm')();
 
+charm.pipe(process.stdout);
+charm.reset();
 var scrapers = [];
 
 function includeDirectory(directoryPath) {
@@ -14,7 +17,9 @@ function includeDirectory(directoryPath) {
 }
 
 function includeScraper(scraperPath) {
-	scrapers.push(require('./' + scraperPath));
+	var scraper = require('./' + scraperPath);
+	scraper.path = scraperPath;
+	scrapers.push(scraper);
 }
 
 program
@@ -38,9 +43,30 @@ var repositoryDefinitions = [
 	}
 ];
 
+var statusOffset = 0;
+function status(scraper,status) {
+	charm.push();
+	charm.up(scrapers.length-scraper.index);
+	charm.right(statusOffset+1);
+	charm.erase('end');
+	charm.write(status);
+	charm.pop();
+}
+
 function scrape(scrapers,callback) {
+	for(var i=0;i<scrapers.length;i++) {
+		scrapers[i].index = i;
+		charm.push();
+		charm.write(scrapers[i].path);
+		charm.pop();
+		charm.down(1);
+		statusOffset = Math.max(statusOffset, scrapers[i].path.length);
+	}
 	async.map(scrapers,function(scraper,callback) {
-		scraper(request,callback);
+		status(scraper,'working');
+		scraper(request,function() {
+			status(scraper,'done');
+		});
 	},callback);
 }
 
