@@ -5,7 +5,7 @@ SIZE=48
 GSIZE=${SIZE}x${SIZE}
 RESIZE=("-resize" "$GSIZE" "-gravity" "center" "-extent" "$GSIZE")
 
-DST=logos
+DST=out/logos
 mkdir -p $DST
 
 TMP=tmp/logos
