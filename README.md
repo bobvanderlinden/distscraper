@@ -18,9 +18,9 @@ To let distscaper retrieve all images of all distributions, execute:
 
 To let distscaper only retrieve specified distributions, for example only Debian, execute:
 
-    $ node index.js debian
+    $ node index.js -s scrapers/debian.js
 
-Retrieval of logo-images of the different distribution is done through `retrievelogos.sh`. This script downloads images of the distributions from various sources and transforms them to 32x32-PNG logos:
+Retrieval of logo-images of the different distribution is done through `retrievelogos.sh`. This script downloads images of the distributions from various sources and transforms them to 48x48-PNG logos:
 
     $ ./retrievelogos.sh
 
