@@ -24,17 +24,22 @@ module.exports = function(request,callback) {
 				async.map(versions,function(version,callback) {
 					var versionurl = archurl+version+'/';
 					request.dom(versionurl,function(err,$) {
-						var isos = $('pre a').map(function(a) {
+						var isourls = $('pre a').map(function(a) {
 							return (/^.*\.iso$/).exec(a.attr('href'));
-						}).compact().map(first);
-						var releases = isos.map(function(iso) {
-							return {
-								url: 'http://bouncer.gentoo.org/fetch/gentoo-'+version+'-livedvd/'+arch+'/'+iso,
-								arch: arch,
-								version: version
-							};
+						}).compact().map(first).map(function(iso) {
+							return 'http://bouncer.gentoo.org/fetch/gentoo-'+version+'-livedvd/'+arch+'/'+iso;
 						});
-						callback(null,releases);
+						async.map(isourls,function(isourl,callback) {
+							request.contentlength(isourl,function(err,contentlength) {
+								if (err) { return callback(err); }
+								callback(null,{
+									url: isourl,
+									arch: arch,
+									version: version,
+									size: contentlength
+								});
+							});
+						},callback);
 					});
 				},function(err,releases) {
 					callback(err,releases.flatten());
