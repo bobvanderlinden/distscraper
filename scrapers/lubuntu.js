@@ -2,11 +2,11 @@ var async = require('async');
 var sugar = require('sugar');
 var url = require('url');
 
-function first(a) { return a[0]; }
+function first(a) { return a[1]; }
 module.exports = function(request,callback) {
 	var distributionurl = 'http://cdimage.ubuntu.com/lubuntu/releases/';
 	request.dom(distributionurl,function(err,$) {
-		var versions = $('a').map(function(a) { return (/^\d+\.\d+/).exec(a.attr('href')); }).compact().map(first);
+		var versions = $('a').map(function(a) { return (/^(\d+\.\d+.*)\/$/).exec(a.attr('href')); }).compact().map(first);
 		var distribution = {
 			id: 'lubuntu',
 			name: 'Lubuntu',

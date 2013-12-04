@@ -1,11 +1,11 @@
 var async = require('async');
 var sugar = require('sugar');
 
-function first(a) { return a[0]; }
+function first(a) { return a[1]; }
 module.exports = function(request,callback) {
 	var distributionurl = 'http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/';
 	request.dom(distributionurl,function(err,$) {
-		var versions = $('table a').map(function(a) { return (/^\d+\.\d+/).exec(a.attr('href')); }).compact().map(first);
+		var versions = $('table a').map(function(a) { return (/^(\d+(\.\d+)+)\/$/).exec(a.attr('href')); }).compact().map(first);
 		var distribution = {
 			id: 'freebsd',
 			name: 'FreeBSD',
