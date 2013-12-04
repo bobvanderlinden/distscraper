@@ -4,6 +4,7 @@ var async = require('async');
 var path = require('path');
 var request = require('./request');
 var program = require('commander');
+var mkdirp = require('mkdirp');
 
 var scrapers = [];
 
@@ -123,16 +124,18 @@ scrape(scrapers, function(err,distributions) {
 		};
 	});
 
-	async.forEach(repositories, function(repository,cb) {
-		var repositoryPath = path.join(program.output, repository.name + '.json');
-		fs.writeFile(repositoryPath, JSON.stringify(repository.distributions), cb);
-	},function(err) {
-		if (err) {
-			console.error(err);
-			process.exit(1);
-			return;
-		}
-		process.exit(0);
+	mkdirp(program.output,function() {
+		async.forEach(repositories, function(repository,cb) {
+			var repositoryPath = path.join(program.output, repository.name + '.json');
+			fs.writeFile(repositoryPath, JSON.stringify(repository.distributions), cb);
+		},function(err) {
+			if (err) {
+				console.error(err);
+				process.exit(1);
+				return;
+			}
+			process.exit(0);
+		});
 	});
 });
 
