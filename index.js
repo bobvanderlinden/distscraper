@@ -87,64 +87,36 @@ function showScraperStatus(scraper,status) {
 	}
 }
 
-function scrape(scrapers,callback) {
+function runScraper(scraper,callback) {
+	scraper(request,function(err,distribution) {
+		if (err) { return callback(err,distribution); }
+		var errors = validateDistribution(distribution);
+		if (errors.length > 0) {
+			return callback(errors,distribution);
+		}
+		return callback(null,distribution);
+	});
+}
+
+function runScrapers(scrapers,callback) {
 	showScrapers(scrapers);
 	async.map(scrapers,function(scraper,callback) {
 		showScraperStatus(scraper,'working');
-		scraper(request,function(err,distribution) {
+		runScraper(scraper,function(err,distribution) {
 			if (err) {
 				showScraperStatus(scraper,'error ('+err+')');
-			} else {
-				if (validateDistribution(distribution).length === 0) {
-					showScraperStatus(scraper,'done ('+distribution.releases.length+' releases)');
-				} else {
-					showScraperStatus(scraper,'invalid');
-				}
+				return callback(err,distribution);
 			}
-
-			callback(err,distribution);
+			showScraperStatus(scraper,'done ('+distribution.releases.length+' releases)');
+			return callback(null,distribution);
 		});
 	},callback);
 }
 
-scrape(scrapers, function(err,distributions) {
-	if (err) { console.error(err); throw err; }
-
-	var errors = validateDistributions(distributions);
-	if (errors.length > 0) {
-		console.error(errors);
-		process.exit(1);
-		return;
-	}
-
-	var repositories = repositoryDefinitions.map(function(repositoryDefinition) {
-		return {
-			name: repositoryDefinition.name,
-			distributions: distributions.filter(repositoryDefinition.filter.bind(repositoryDefinition))
-		};
-	});
-
-	mkdirp(program.output,function() {
-		async.forEach(repositories, function(repository,cb) {
-			var repositoryPath = path.join(program.output, repository.name + '.json');
-			fs.writeFile(repositoryPath, JSON.stringify(repository.distributions), cb);
-		},function(err) {
-			if (err) {
-				console.error(err);
-				process.exit(1);
-				return;
-			}
-			process.exit(0);
-		});
-	});
-});
-
 function validateDistributions(distributions) {
-	var errors = [];
-	distributions.forEach(function(distro) {
-		errors.concat(validateDistribution(distro));
-	});
-	return errors;
+	return distributions.reduce(function(errors,distro) {
+		return errors.concat(validateDistribution(distro));
+	},[]);
 }
 
 function validateDistribution(distro) {
@@ -175,4 +147,27 @@ function validateDistribution(distro) {
 	return errors;
 }
 
+runScrapers(scrapers, function(err,distributions) {
+	if (err) { console.error(err); throw err; }
 
+	var repositories = repositoryDefinitions.map(function(repositoryDefinition) {
+		return {
+			name: repositoryDefinition.name,
+			distributions: distributions.filter(repositoryDefinition.filter.bind(repositoryDefinition))
+		};
+	});
+
+	mkdirp(program.output,function() {
+		async.forEach(repositories, function(repository,cb) {
+			var repositoryPath = path.join(program.output, repository.name + '.json');
+			fs.writeFile(repositoryPath, JSON.stringify(repository.distributions), cb);
+		},function(err) {
+			if (err) {
+				console.error(err);
+				process.exit(1);
+				return;
+			}
+			process.exit(0);
+		});
+	});
+});
