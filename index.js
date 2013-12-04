@@ -100,6 +100,8 @@ function scrape(scrapers,callback) {
 					showScraperStatus(scraper,'invalid');
 				}
 			}
+			
+			callback(err,distribution);
 		});
 	},callback);
 }
