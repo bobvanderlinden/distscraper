@@ -95,13 +95,13 @@ function scrape(scrapers,callback) {
 			if (err) {
 				showScraperStatus(scraper,'error ('+err+')');
 			} else {
-				if (validateDistribution(distribution)) {
+				if (validateDistribution(distribution).length === 0) {
 					showScraperStatus(scraper,'done ('+distribution.releases.length+' releases)');
 				} else {
 					showScraperStatus(scraper,'invalid');
 				}
 			}
-			
+
 			callback(err,distribution);
 		});
 	},callback);
