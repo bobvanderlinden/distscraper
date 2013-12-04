@@ -38,7 +38,7 @@ if (process.stdout.isTTY && !program.nonhuman) {
 	charm = null;
 }
 
-if (!program.directory || !program.scraper) {
+if (!program.directory && !program.scraper) {
 	includeDirectory('scrapers');
 }
 
