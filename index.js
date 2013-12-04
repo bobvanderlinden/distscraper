@@ -68,7 +68,7 @@ function showScrapers(scrapers) {
 		}
 	} else {
 		for(i=0;i<scrapers.length;i++) {
-			showScraperStatus(scrapers[i].path,'starting');
+			showScraperStatus(scrapers[i],'starting');
 		}
 	}
 }
@@ -90,11 +90,15 @@ function scrape(scrapers,callback) {
 	showScrapers(scrapers);
 	async.map(scrapers,function(scraper,callback) {
 		showScraperStatus(scraper,'working');
-		scraper(request,function(err,result) {
+		scraper(request,function(err,distribution) {
 			if (err) {
 				showScraperStatus(scraper,'error ('+err+')');
 			} else {
-				showScraperStatus(scraper,'done ('+result.length+' results)');
+				if (validateDistribution(distribution)) {
+					showScraperStatus(scraper,'done ('+distribution.releases.length+' releases)');
+				} else {
+					showScraperStatus(scraper,'invalid');
+				}
 			}
 		});
 	},callback);
