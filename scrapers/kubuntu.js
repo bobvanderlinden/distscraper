@@ -2,11 +2,11 @@ var async = require('async');
 var sugar = require('sugar');
 var url = require('url');
 
-function first(a) { return a[0]; }
+function first(a) { return a[1]; }
 module.exports = function(request,callback) {
 	var distributionurl = 'http://cdimage.ubuntu.com/kubuntu/releases/';
 	request.dom(distributionurl,function(err,$) {
-		var versions = $('a').map(function(a) { return (/^\d+\.\d+/).exec(a.attr('href')); }).compact().map(first);
+		var versions = $('a').map(function(a) { return (/^(\d+(\.\d+)+)\/$/).exec(a.attr('href')); }).compact().map(first);
 		var distribution = {
 			id: 'kubuntu',
 			name: 'Kubuntu',
@@ -16,7 +16,7 @@ module.exports = function(request,callback) {
 		async.map(versions,function(version,callback) {
 			var versionurl = url.resolve(distributionurl,version+'/release/');
 			request.dom(versionurl,function(err,$) {
-				var releases = $('a').map(function(a) {
+				var releases = $('pre a').map(function(a) {
 					return a.attr('href');
 				}).compact().filter(function(filename) {
 					return (/\.iso$/).test(filename);
