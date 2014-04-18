@@ -59,18 +59,18 @@ function requestContentLength(options,result) {
 	var newOptions = { method: 'HEAD' };
 	Object.merge(newOptions,options);
 	requestBase(newOptions,function(err,response) {
-		if (err) { return result(err); }
-		if (response.statusCode < 200 || response.statusCode >= 300) { return result(null,null); }
+		if (err) { return result(err,null,response); }
+		if (response.statusCode < 200 || response.statusCode >= 300) { return result(null,null,response); }
 		var contentLength = response.headers['content-length'];
 		if (contentLength === undefined) {
-			result(null,contentLength);
+			result(null,contentLength,response);
 		}
 		try {
 			contentLength = parseInt(contentLength,10);
 		} catch(e) {
-			result(e);
+			result(e,null,response);
 		}
-		result(null,contentLength);
+		result(null,contentLength,response);
 	});
 }
 
