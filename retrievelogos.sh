@@ -180,3 +180,12 @@ convert -background none $TMP/alphaos.png -trim ${RESIZE[@]} $DST/alphaos.png
 retrieve https://upload.wikimedia.org/wikipedia/commons/9/94/System-rescue-cd-logo-new.svg $TMP/systemrescuecd.svg
 xmlstarlet ed -N "svg=http://www.w3.org/2000/svg" -d "//*[@id='text2837']" -d "//*[@id='text2831']" $TMP/systemrescuecd.svg >| $TMP/systemrescuecd_logo.svg
 convert -background none $TMP/systemrescuecd_logo.svg -trim ${RESIZE[@]} $DST/systemrescuecd.png
+
+# NixOS
+retrieve https://nixos.org/logo/nixos-logo-only-hires.png $TMP/nixos.png
+convert -background none $TMP/nixos.png -trim ${RESIZE[@]} $DST/nixos.png
+
+# Super Grub2 Disk
+retrieve http://www.supergrubdisk.org/wp-content/themes/SGD/images/S2.png $TMP/supergrub2disk.png
+convert -background none $TMP/supergrub2disk.png -trim ${RESIZE[@]} $DST/supergrub2disk.png
+
