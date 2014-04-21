@@ -193,3 +193,7 @@ convert -background none $TMP/supergrub2disk.png -trim ${RESIZE[@]} $DST/supergr
 retrieve http://distro.ibiblio.org/puppylinux/puppy-slacko-5.7/puppylogo96.png $TMP/puppylinux.png
 convert -background none $TMP/puppylinux.png -trim ${RESIZE[@]} $DST/puppylinux.png
 
+# Slax
+retrieve https://upload.wikimedia.org/wikipedia/en/b/ba/Slax_linux_logo.svg $TMP/slax.svg
+convert -background none $TMP/slax.svg -trim ${RESIZE[@]} $DST/slax.png
+
