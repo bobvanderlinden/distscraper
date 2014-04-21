@@ -189,3 +189,7 @@ convert -background none $TMP/nixos.png -trim ${RESIZE[@]} $DST/nixos.png
 retrieve http://www.supergrubdisk.org/wp-content/themes/SGD/images/S2.png $TMP/supergrub2disk.png
 convert -background none $TMP/supergrub2disk.png -trim ${RESIZE[@]} $DST/supergrub2disk.png
 
+# Puppy Linux
+retrieve http://distro.ibiblio.org/puppylinux/puppy-slacko-5.7/puppylogo96.png $TMP/puppylinux.png
+convert -background none $TMP/puppylinux.png -trim ${RESIZE[@]} $DST/puppylinux.png
+
