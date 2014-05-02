@@ -197,3 +197,7 @@ convert -background none $TMP/puppylinux.png -trim ${RESIZE[@]} $DST/puppylinux.
 retrieve https://upload.wikimedia.org/wikipedia/en/b/ba/Slax_linux_logo.svg $TMP/slax.svg
 convert -background none $TMP/slax.svg -trim ${RESIZE[@]} $DST/slax.png
 
+# Evo/lution
+retrieve http://softwarebakery.com/apps/drivedroid/files/evolution-logo.png $TMP/evolution.png
+convert -background none $TMP/evolution.png -trim ${RESIZE[@]} $DST/evolution.png
+
