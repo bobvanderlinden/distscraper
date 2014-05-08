@@ -13,7 +13,7 @@ module.exports = function(request,cb) {
 			})
 			.filter(function(url) { return (/\.iso$/).test(url); });
 		async.map(urls,function(url,cb) {
-			var version = /\-(\d+(\.\d+)*(\-\d+[a-z]*)?)/.exec(url)[1];
+			var version = /\-(\d+(\.\d+)*(\-\d+)?)/.exec(url)[1];
 			request.contentlength(url,function(err,size) {
 				if (err) { return cb(err); }
 				cb(null,{
