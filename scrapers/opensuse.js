@@ -18,6 +18,7 @@ module.exports = function(request,callback) {
 		async.map(versions,function(version,callback) {
 			var isosurl = distributionurl+version+'/iso/';
 			request.dom(isosurl,function(err,$) {
+				if (err) { return callback(err); }
 				var releases = $('pre a').map(function(a) {
 					return a.attr('href');
 				}).compact().filter(function(filename) {
