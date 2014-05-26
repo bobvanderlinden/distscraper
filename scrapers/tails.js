@@ -29,7 +29,7 @@ module.exports = function(request,cb) {
 					.filter(function(match) { return match !== null; })
 					.map(function(match) {
 						return {
-							url: URL.resolve(response.url,match[0]).replace('83.212.104.246','dl.amnesia.boum.org'),
+							url: URL.resolve(response.url,match[0]),
 							version: match[2],
 							arch: match[1]
 						};
@@ -37,6 +37,7 @@ module.exports = function(request,cb) {
 				async.map(releases,function(release,cb) {
 					request.contentlength(requestOptions(release.url),function(err,contentLength) {
 						if (err) { return cb(err); }
+						release.url = release.url.replace('83.212.104.246','dl.amnesia.boum.org');
 						release.size = contentLength;
 						cb(null,release);
 					});
