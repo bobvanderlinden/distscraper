@@ -11,7 +11,7 @@ module.exports = function(request,cb) {
 			.filter(function(url) { return /super_grub2_disk_.*\.iso$/.test(url); })
 			.map(function(url) { return URL.resolve(response.url,url); });
 		async.map(urls,function(url,cb) {
-			var version = /\d+(\.\w+)+(-(beta|rc)\w+)/.exec(url)[0];
+			var version = /_(\d+(\.\w+)+(-\w+)?)\.iso$/.exec(url)[1];
 			request.contentlength(url,function(err,size,response) {
 				if(err) { return cb(err); }
 				if (!response.headers['content-disposition']) {
