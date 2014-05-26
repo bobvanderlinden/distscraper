@@ -5,7 +5,7 @@ function first(a) { return a[0]; }
 module.exports = function(request,callback) {
 	var distributionurl = 'http://dl.fedoraproject.org/pub/fedora/linux/releases/';
 	request.dom(distributionurl,function(err,$) {
-		var versions = $('pre a').map(function(a) {
+		var versions = $('a').map(function(a) {
 			return (/^\d+/).exec(a.attr('href'));
 		}).compact().map(first);
 		var distribution = {
@@ -18,7 +18,7 @@ module.exports = function(request,callback) {
 		function requestISOs(version,isourl,callback) {
 			request.dom(isourl,p(function(err,$) {
 				if (err) { return callback(err); }
-				distribution.releases.push.apply(distribution.releases,$('pre a').map(function(a) {
+				distribution.releases.push.apply(distribution.releases,$('a').map(function(a) {
 					return (/^.*\.iso$/).exec(a.attr('href'));
 				}).compact().map(first).map(function(filename) {
 					return {version: version,url:isourl+filename};
@@ -26,7 +26,6 @@ module.exports = function(request,callback) {
 				callback();
 			}));
 		}
-
 		async.map(versions,function(version,callback) {
 			var versionurls = [
 				'/Live/i686/',
@@ -38,10 +37,11 @@ module.exports = function(request,callback) {
 				return distributionurl+version+subpath;
 			});
 
+
 			function requestISOs(versionurl,callback) {
 				request.dom(versionurl,function(err,$) {
 					if (err) { return callback(err); }
-					var releases = $('pre a').map(function(a) {
+					var releases = $('a').map(function(a) {
 						return a.attr('href');
 					}).compact().filter(function(filename) {
 						return (/\.iso$/).test(filename);
