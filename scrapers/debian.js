@@ -4,6 +4,7 @@ var sugar = require('sugar');
 function first(a) { return a[0]; }
 module.exports = function(request,callback) {
 	request.dom('http://www.debian.org/distrib/netinst',function(err,$) {
+		if (err) { return callback(err); }
 		var distribution = {
 			id: 'debian',
 			name: 'Debian',
