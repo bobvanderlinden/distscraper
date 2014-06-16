@@ -21,23 +21,31 @@ module.exports = function(request,callback) {
 			var url = version.url;
 			request.dom(url,function(err,$) {
 				if (err) { return callback(err); }
-				var files = $('th[headers=files_name_h] a.name').map(function(a) {
+				var flavors = $('th[headers=files_name_h] a.name').map(function(a) {
 					a = $(a);
-					var fileUrl = URL.resolve(url,a.attr('href'))
-						.replace(/^https/,'http')
-						.replace(/\/download$/,'');
-					return { url: fileUrl, version: version.name };
-				}).filter(function(file) {
-					return /\.iso$/.test(file.url);
-				}).map(function(file) {
-					file.arch = /(i686|x86_64)/.exec(file.url)[0];
-					return file;
+					return URL.resolve(url,a.attr('href'));
 				});
-				async.map(files,function(file,callback) {
-					request.contentlength(file.url,function(err,contentLength) {
-						if (err) { return callback(err); }
-						file.size = contentLength;
-						callback(null,file);
+				async.map(flavors,function(url,callback) {
+					request.dom(url,function(err,$) {
+						var files = $('th[headers=files_name_h] a.name').map(function(a) {
+							a = $(a);
+							var fileUrl = URL.resolve(url,a.attr('href'))
+								.replace(/^https/,'http')
+								.replace(/\/download$/,'');
+							return { url: fileUrl, version: version.name };
+						}).filter(function(file) {
+							return /\.iso$/.test(file.url);
+						}).map(function(file) {
+							file.arch = /(i686|x86_64)/.exec(file.url)[0];
+							return file;
+						});
+						async.map(files,function(file,callback) {
+							request.contentlength(file.url,function(err,contentLength) {
+								if (err) { return callback(err); }
+								file.size = contentLength;
+								callback(null,file);
+							});
+						},callback);
 					});
 				},callback);
 			});
