@@ -37,14 +37,14 @@ module.exports = function(request,callback) {
 	retrieveISOs('http://mirrors.kernel.org/mageia/iso/',function(err,urls) {
 		if (err) { return callback(err); }
 		async.map(urls,function(url,cb) {
-			var match = /\/Mageia-(\d+)-(x86_64|i586|dual)-[^\/]+\.iso$/ig.exec(url);
+			var match = /\/Mageia-(\d+(\.\d+)*)-(x86_64|i586|dual)-[^\/]+\.iso$/ig.exec(url);
 			if (!match) { return cb(null,null); }
 			request.contentlength(url,function(err,contentLength) {
 				if (err) { return cb(err); }
 				cb(null,{
 					url: url,
 					version: match[1],
-					arch: match[2],
+					arch: match[3],
 					size: contentLength
 				});
 			});
