@@ -35,6 +35,12 @@ module.exports = function(request,callback) {
 						};
 						var archMatch = /[-\.](32bit|64bit)[-\.]/.exec(release.url);
 						if (archMatch) { release.arch = archMatch[1]; }
+
+						var minorVersionMatch = /[-\.]v(\d+)[-\.]/.exec(release.url);
+						if (minorVersionMatch) {
+							release.version += '.' + minorVersionMatch[1];
+						}
+
 						callback(null,release);
 					});
 				},callback);
