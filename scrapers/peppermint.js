@@ -7,7 +7,7 @@ module.exports = function(request,cb) {
 		if (err) { return cb(err); }
 		async.map($('a').map(function(a) {
 				a = $(a);
-				return URL.resolve(response.url,a.attr('href'));
+				return URL.resolve(response.url,a.attr('href')||'');
 			}).map(function(url) {
 				var match = /Peppermint-(\d+-\d+)-(\w+)\.iso$/.exec(url);
 				if (!match) { return null; }
