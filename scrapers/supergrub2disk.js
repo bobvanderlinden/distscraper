@@ -13,7 +13,10 @@ module.exports = function(request,cb) {
 		async.map(urls,function(url,cb) {
 			var version = /_(\d+(\.\w+)+(-\w+)?)\.iso$/.exec(url)[1];
 			request.contentlength(url,function(err,size,response) {
-				if(err) { return cb(err); }
+				if(err) {
+					// Skip URLs that give errors. URLs tend to be shaky here.
+					return cb(null,null);
+				}
 				if (!response.headers['content-disposition']) {
 					return cb(null,null);
 				}
