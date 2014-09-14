@@ -201,3 +201,7 @@ convert -background none $TMP/slax.svg -trim ${RESIZE[@]} $DST/slax.png
 retrieve http://softwarebakery.com/apps/drivedroid/files/evolution-logo.png $TMP/evolution.png
 convert -background none $TMP/evolution.png -trim ${RESIZE[@]} $DST/evolution.png
 
+# Antergos
+retrieve http://storage.antergos.com/art/antergos-logo.svg $TMP/antergos.svg
+xmlstarlet ed -d "/_:svg/_:g/*[@id!='g5349']" -d "/_:svg/_:g/_:g[@id='g5349']/*[@id='text5357']" $TMP/antergos.svg >| $TMP/antergos_logo.svg
+inkscape --export-png=$DST/antergos.png --export-area-drawing --export-width=${SIZE} --export-height=${SIZE} $TMP/antergos_logo.svg
