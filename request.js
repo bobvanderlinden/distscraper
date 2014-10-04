@@ -3,17 +3,28 @@ var cheerio = require('cheerio');
 var async = require('async');
 var sugar = require('sugar');
 var cookieJar = request.jar();
+var URL = require('url');
 
 var request = request.defaults({
 	method: 'GET'
 });
 
-var q = async.queue(request,2);
+var requestQueues = {};
+function getRequestQueue(host) {
+	host = host.toLowerCase();
+	var requestQueue = requestQueues[host];
+	if (!requestQueue) {
+		requestQueue = requestQueues[host] = async.queue(request,1);
+	}
+	return requestQueue;
+}
 
 function requestBase(options,result) {
 	if (typeof options === 'string') {
 		options = { url: options };
 	}
+	var host = URL.parse(options.url).host;
+	var q = getRequestQueue(host);
 	q.push(options,handleResponse);
 	function handleResponse(err,response,body) {
 		if (err) {
