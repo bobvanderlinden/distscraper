@@ -18,6 +18,7 @@ module.exports = function(request,callback) {
 		async.map(versions,function(version,callback) {
 			var isosurl = distributionurl+version+'/';
 			request.dom(isosurl,function(err,$) {
+				if (err) { return callback(err); }
 				var urls = $('pre a').map(function(a) {
 					return a.attr('href');
 				}).compact().filter(function(filename) {
@@ -46,6 +47,7 @@ module.exports = function(request,callback) {
 				},callback);
 			});
 		},function(err,releases) {
+			if (err) { return callback(err); }
 			distribution.releases = releases.flatten();
 			callback(null,distribution);
 		});
