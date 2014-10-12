@@ -5,6 +5,7 @@ function first(a) { return a[0]; }
 module.exports = function(request,callback) {
 	var distributionurl = 'http://mirrors.xbmc.org/releases/XBMCbuntu/';
 	request.dom(distributionurl,function(err,$) {
+		if (err) { return callback(err); }
 		var versions = $('pre a').map(function(a) {
 			return (/^\d+(\.\d+)*/).exec(a.attr('href'));
 		}).compact().map(first);
@@ -34,6 +35,7 @@ module.exports = function(request,callback) {
 				callback(null,release);
 			});
 		},function(err,releases) {
+			if (err) { return callback(err); }
 			distribution.releases = releases;
 			callback(null,distribution);
 		});
