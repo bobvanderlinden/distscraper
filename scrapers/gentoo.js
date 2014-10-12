@@ -1,5 +1,6 @@
 var async = require('async');
 var sugar = require('sugar');
+var URL = require('url');
 
 function first(a) { return a[0]; }
 module.exports = function(request,callback) {
@@ -16,24 +17,25 @@ module.exports = function(request,callback) {
 		async.map(arches,function(arch,callback) {
 
 			var archurl = distributionurl+arch+'/';
-			request.dom(archurl,function(err,$) {
+			request.dom(archurl,function(err,$,response) {
 				var versions = $('pre a').map(function(a) {
 					return (/^\d+(\.\d+)*/).exec(a.attr('href'));
 				}).compact().map(first);
 
 				async.map(versions,function(version,callback) {
 					var versionurl = archurl+version+'/';
-					request.dom(versionurl,function(err,$) {
+					request.dom(versionurl,function(err,$,response) {
 						var isourls = $('pre a').map(function(a) {
 							return (/^.*\.iso$/).exec(a.attr('href'));
 						}).compact().map(first).map(function(iso) {
-							return 'http://bouncer.gentoo.org/fetch/gentoo-'+version+'-livedvd/'+arch+'/'+iso;
+							return URL.resolve(response.url,iso);
 						});
 						async.map(isourls,function(isourl,callback) {
 							request.contentlength(isourl,function(err,contentlength) {
 								if (err) { return callback(err); }
+								var filename = /\/([^\/]+\.iso)$/.exec(isourl)[1];
 								callback(null,{
-									url: isourl,
+									url: 'http://bouncer.gentoo.org/fetch/gentoo-'+version+'-livedvd/'+arch+'/'+filename,
 									arch: arch,
 									version: version,
 									size: contentlength
