@@ -87,6 +87,8 @@ function showScraperStatus(scraper,status) {
 	}
 }
 
+var scraperQueue = async.queue(runScraper,2);
+
 function runScraper(scraper,callback) {
 	scraper(request,function(err,distribution) {
 		if (err) { return callback(err,distribution); }
@@ -98,13 +100,17 @@ function runScraper(scraper,callback) {
 	});
 }
 
-function runScrapers(scrapers,callback) {
+function queueScraper(scraper,callback) {
+	return scraperQueue.push(scraper,callback);
+}
+
+function queueScrapers(scrapers,callback) {
 	showScrapers(scrapers);
 	async.map(scrapers,function(scraper,callback) {
 		showScraperStatus(scraper,'working');
-		runScraper(scraper,function(err,distribution) {
+		queueScraper(scraper,function(err,distribution) {
 			if (err) {
-				showScraperStatus(scraper,'error ('+err+')');
+				showScraperStatus(scraper,'error ('+JSON.stringify(err)+')');
 				return callback(err,distribution);
 			}
 			showScraperStatus(scraper,'done ('+distribution.releases.length+' releases)');
@@ -147,7 +153,7 @@ function validateDistribution(distro) {
 	return errors;
 }
 
-runScrapers(scrapers, function(err,distributions) {
+queueScrapers(scrapers, function(err,distributions) {
 	if (err) { console.error(err); throw err; }
 
 	var repositories = repositoryDefinitions.map(function(repositoryDefinition) {
