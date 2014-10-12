@@ -90,6 +90,7 @@ function showScraperStatus(scraper,status) {
 var scraperQueue = async.queue(runScraper,2);
 
 function runScraper(scraper,callback) {
+	showScraperStatus(scraper,'working');
 	scraper(request,function(err,distribution) {
 		if (err) { return callback(err,distribution); }
 		var errors = validateDistribution(distribution);
@@ -107,7 +108,7 @@ function queueScraper(scraper,callback) {
 function queueScrapers(scrapers,callback) {
 	showScrapers(scrapers);
 	async.map(scrapers,function(scraper,callback) {
-		showScraperStatus(scraper,'working');
+		showScraperStatus(scraper,'queued');
 		queueScraper(scraper,function(err,distribution) {
 			if (err) {
 				showScraperStatus(scraper,'error ('+JSON.stringify(err)+')');
