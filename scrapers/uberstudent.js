@@ -30,7 +30,7 @@ module.exports = function(request,callback) {
 				}).filter(function(file) {
 					return /\.iso$/.test(file.url);
 				}).map(function(file) {
-					file.arch = /(i386|i486|i686|amd64)/.exec(file.url)[0];
+					file.arch = /(i386|i486|i686|amd64|32bit|64bit)/.exec(file.url)[0];
 					file.version = /[-\.](\d+(\.\d+)*)[-\.]/.exec(file.url)[1];
 					return file;
 				});
