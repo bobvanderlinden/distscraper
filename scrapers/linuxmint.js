@@ -29,6 +29,7 @@ module.exports = function(request,callback) {
 				async.map(urls,function(url,callback) {
 					request.contentlength(url,function(err,contentLength) {
 						if (err) { return callback(err); }
+						if (!contentLength) { return callback(null,null); }
 						var release = {
 							version: version,
 							url: url,
@@ -48,7 +49,7 @@ module.exports = function(request,callback) {
 			});
 		},function(err,releases) {
 			if (err) { return callback(err); }
-			distribution.releases = releases.flatten();
+			distribution.releases = releases.flatten().compact();
 			callback(null,distribution);
 		});
 	});
