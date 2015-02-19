@@ -4,7 +4,7 @@ var URL = require('url');
 
 function first(a) { return a[0]; }
 module.exports = function(request,callback) {
-	var distributionurl = 'http://mirrors.kernel.org/gentoo/releases/';
+	var distributionurl = 'http://198.145.20.143/gentoo/releases/';
 	request.dom(distributionurl,function(err,$) {
 		var arches = ['x86','amd64'];
 		var distribution = {

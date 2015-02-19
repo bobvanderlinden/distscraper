@@ -3,7 +3,7 @@ var sugar = require('sugar');
 
 function first(a) { return a[0]; }
 module.exports = function(request,callback) {
-	var distributionurl = 'http://mirrors.kernel.org/linuxmint/stable/';
+	var distributionurl = 'http://198.145.20.143/linuxmint/stable/';
 	request.dom(distributionurl,function(err,$) {
 		var versions = $('pre a').map(function(a) {
 			return (/^\d+(\.\d+)*/).exec(a.attr('href'));
