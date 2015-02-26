@@ -8,6 +8,7 @@ function getLinks($) {
 module.exports = function(request,callback) {
 	var distributionurl = 'http://mirror.slitaz.org/iso/';
 	request.dom(distributionurl,function(err,$) {
+		if (err) { return callback(err); }
 		var versions = getLinks($).filter(function(a) {
 			// From 3.0 all releases should have hybrid isos, however at the moment 4.0 does not, so filter those.
 			return !(['1.0','2.0','4.0'].find(a.text())) && (
@@ -25,6 +26,7 @@ module.exports = function(request,callback) {
 		};
 		async.map(versions,function(version,callback) {
 			request.dom(version.url,function(err,$) {
+				if (err) { return callback(err); }
 				var releases = getLinks($).filter(function(a) {
 					return (/^slitaz-.*\.iso$/).test(a.text());
 				}).map(function(a) {
@@ -42,6 +44,7 @@ module.exports = function(request,callback) {
 				},callback);
 			});
 		},function(err,releases) {
+			if (err) { return callback(err); }
 			
 			// Hack to still have latest bootable stable version of SliTaz in distributionlist.
 			releases.push({
