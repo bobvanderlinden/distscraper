@@ -33,6 +33,7 @@ module.exports = function(request,callback) {
 				callback(null,file);
 			});
 		},function(err,files) {
+			if (err) { return callback(err); }
 			distribution.releases = files;
 			callback(null,distribution);
 		});

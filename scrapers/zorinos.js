@@ -4,6 +4,7 @@ var sugar = require('sugar');
 module.exports = function(request,callback) {
 	var distributionurl = 'http://distro.ibiblio.org/zorin/';
 	request.dom(distributionurl,function(err,$) {
+		if (err) { return callback(err); }
 		var versions = $('a').map(function(a) {
 			return (/^(\d+(\.\d+)*)\/$/).exec(a.attr('href'));
 		}).compact().map(function(match) { return match[1]; });
@@ -16,6 +17,7 @@ module.exports = function(request,callback) {
 		async.map(versions,function(version,callback) {
 			var isosurl = distributionurl+version+'/';
 			request.dom(isosurl,function(err,$) {
+				if (err) { return callback(err); }
 				var urls = $('a').map(function(a) {
 					return a.attr('href');
 				}).compact().filter(function(filename) {
@@ -38,6 +40,7 @@ module.exports = function(request,callback) {
 				},callback);
 			});
 		},function(err,releases) {
+			if (err) { return callback(err); }
 			distribution.releases = releases.flatten();
 			callback(null,distribution);
 		});

@@ -44,6 +44,7 @@ module.exports = function(request,callback) {
 				},callback);
 			});
 		},function(err,files) {
+			if (err) { return callback(err); }
 			distribution.releases = files.flatten();
 			callback(null,distribution);
 		});

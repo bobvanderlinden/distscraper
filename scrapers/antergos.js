@@ -22,6 +22,7 @@ module.exports = function(request,cb) {
                 return cb(null,release);
             });
         },function(err,releases) {
+            if (err) { return cb(err); }
             return cb(null,{
                 id: 'antergos',
                 name: 'Antergos',
