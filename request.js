@@ -4,6 +4,7 @@ var async = require('async');
 var sugar = require('sugar');
 var cookieJar = request.jar();
 var URL = require('url');
+var debug = require('debug')('distscraper:request');
 
 var request = request.defaults({
 	method: 'GET'
@@ -26,11 +27,13 @@ function requestBase(options,result) {
 	var host = URL.parse(options.url).host;
 	var q = getRequestQueue(host);
 	q.push(options,handleResponse);
+	debug('queue', options.url);
 	function handleResponse(err,response,body) {
 		if (err) {
 			err.url = options.url;
 			return result(err);
 		}
+		debug('response', options.url, response.statusCode, response.status);
 		if (response.statusCode === 302) { // Handle redirects after POST
 			requestQueue.pushRequest({url:response.headers.location},handleResponse);
 			return;
