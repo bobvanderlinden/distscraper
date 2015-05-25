@@ -5,7 +5,7 @@ var sugar = require('sugar');
 var cookieJar = request.jar();
 var URL = require('url');
 var debug = require('debug')('distscraper:request');
-
+var mirrors = require('./mirrors.js');
 var request = request.defaults({
 	method: 'GET'
 });
@@ -20,14 +20,30 @@ function getRequestQueue(host) {
 	return requestQueue;
 }
 
+function requestMirror(options,result) {
+	var url = options.url || options;
+	var mirrorUrls = options.mirrors || mirrors.map(function(mirror) { return mirror(url); }).flatten();
+	requestBase(options, function(err, response, body) {
+		if (err || response.statusCode >= 400) {
+			if (mirrorUrls.length > 0) {
+				return requestMirror(Object.merge({ url: mirrorUrls.shift(), mirrors: mirrorUrls }), result);
+			}
+		}
+		return result(err, response, body);
+	});
+}
+
 function requestBase(options,result) {
 	if (typeof options === 'string') {
-		options = { url: options };
+		return requestBase({
+			url: options
+		}, result);
 	}
-	var host = URL.parse(options.url).host;
+	debug('queue', options.url);
+	var url = URL.parse(options.url);
+	var host = url.host;
 	var q = getRequestQueue(host);
 	q.push(options,handleResponse);
-	debug('queue', options.url);
 	function handleResponse(err,response,body) {
 		if (err) {
 			err.url = options.url;
@@ -44,14 +60,14 @@ function requestBase(options,result) {
 }
 
 function requestText(options,result) {
-	requestBase(options,function(err,response,body) {
+	requestMirror(options,function(err,response,body) {
 		if (err) { return result(err); }
 		result(null,body);
 	});
 }
 
 function requestDom(options,result) {
-	requestBase(options,function(err,response,body) {
+	requestMirror(options,function(err,response,body) {
 		if (err) { return result(err); }
 		var $ = cheerio.load(body);
 		result(null,$,response);
@@ -59,7 +75,7 @@ function requestDom(options,result) {
 }
 
 function requestXmlDom(options,result) {
-	requestBase(options,function(err,response,body) {
+	requestMirror(options,function(err,response,body) {
 		if (err) { return result(err); }
 		var $ = cheerio.load(body,{xmlMode: true});
 		result(null,$,response);
@@ -72,7 +88,7 @@ function requestContentLength(options,result) {
 	}
 	var newOptions = { method: 'HEAD' };
 	Object.merge(newOptions,options);
-	requestBase(newOptions,function(err,response) {
+	requestMirror(newOptions,function(err,response) {
 		if (err) { return result(err,null,response); }
 		if (response.statusCode < 200 || response.statusCode >= 300) { return result(null,null,response); }
 		var contentLength = response.headers['content-length'];
@@ -108,7 +124,7 @@ cheerio.prototype.mapFilter = function(f) {
 	}).filter(function(e) { return e; });
 };
 
-module.exports = requestBase;
+module.exports = requestMirror;
 module.exports.text = requestText;
 module.exports.dom = requestDom;
 module.exports.xmldom = requestXmlDom;
