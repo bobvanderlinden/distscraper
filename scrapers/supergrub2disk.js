@@ -9,7 +9,8 @@ module.exports = function(request,cb) {
 		var urls = $('a')
 			.map(function(a) { return $(a).attr('href'); })
 			.filter(function(url) { return /super_grub2_disk_.*\.iso$/.test(url); })
-			.map(function(url) { return URL.resolve(response.url,url); });
+			.map(function(url) { return URL.resolve(response.url,url); })
+			.map(function(url) { return url.replace(/^https:/, 'http:'); });
 		async.map(urls,function(url,cb) {
 			var version = /_(\d+(\.\w+)+(-\w+)?)\.iso$/.exec(url)[1];
 			request.contentlength(url,function(err,size,response) {
