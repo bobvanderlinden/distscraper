@@ -35,9 +35,7 @@ var mirrors = [
 
 module.exports = function getMirrors(url) {
 	var match;
-	console.log('url',url);
 	url = URL.parse(url);
-	console.log('sourceforge:', url.host, url.path);
 	if (url.host === 'sourceforge.net') {
 		// http://sourceforge.net/projects/gparted/files/gparted-live-stable/0.21.0-1/gparted-live-0.21.0-1-amd64.iso
 		match = /^\/projects\/([^\/]+)\/files(\/.*[^\/])(\/download)?$/.exec(url.path);
