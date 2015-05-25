@@ -49,7 +49,7 @@ function requestBase(options,result) {
 			err.url = options.url;
 			return result(err);
 		}
-		debug('response', options.url, response.statusCode, response.status);
+		debug('response', options.url, response.statusCode, response.statusMessage);
 		if (response.statusCode === 302) { // Handle redirects after POST
 			requestQueue.pushRequest({url:response.headers.location},handleResponse);
 			return;
