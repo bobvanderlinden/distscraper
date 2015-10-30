@@ -70,6 +70,7 @@ function requestDom(options,result) {
 	requestMirror(options,function(err,response,body) {
 		if (err) { return result(err); }
 		var $ = cheerio.load(body);
+		$.response = response;
 		result(null,$,response);
 	});
 }
