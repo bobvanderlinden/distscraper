@@ -1,59 +1,11 @@
 var async = require('async');
 var sugar = require('sugar');
-var URL = require('url');
-var request = require('../request');
-var Rx =require('rx');
-
-Rx.Observable.fromNodeCallback = function(fn) {
-  var observableFn = Rx.Observable.fromCallback(fn);
-  return function(/*...*/) {
-    return observableFn.apply(this, arguments)
-      .map(function(args) {
-        var err = args[0];
-        if (err) {
-          throw err;
-        }
-        return args[1];
-      });
-  };
-};
-
-Rx.Observable.prototype.subscribeCallback = function(cb) {
-  return this.toNodeCallback(cb)();
-};
-
-Rx.Observable.prototype.toNodeCallback = function (cb) {
-  var source = this;
-  return function () {
-    var val;
-    var hasVal = false;
-    source.subscribe(
-        function (x) {
-          if (hasVal) {
-            throw new Error('Observable emitted multiple values, while one was expected.');
-          }
-          hasVal = true;
-          val = x;
-        },
-        function (e) { cb(e); },
-        function ()  { hasVal && cb(null, val); }
-      );
-  };
-};
-
-function isDirectoryUrl(url) {
-  return url[url.length-1] === '/';
-}
-
-function isFileUrl(url) {
-  return !isDirectoryUrl(url);
-}
-
-var requestDom = Rx.Observable.fromNodeCallback(request.dom.bind(request));
-var requestContentlength = Rx.Observable.fromNodeCallback(request.contentlength.bind(request));
+var URL = require('../lib/url');
+var Rx =require('../lib/rxnode');
+var request =require('../lib/rxrequest');
 
 function getEntries(url) {
-  return requestDom(url)
+  return request.dom(url)
     .flatMap(function($) {
       return Rx.Observable.from(
         $('th[headers=files_name_h] a.name')
@@ -62,11 +14,11 @@ function getEntries(url) {
     });
 }
 
-module.exports = function(request,cb) {
+module.exports = function(_,cb) {
   getEntries('http://sourceforge.net/projects/zorin-os/files/')
-    .filter(isDirectoryUrl)
+    .filter(URL.isDirectoryUrl)
     .flatMap(getEntries)
-    .filter(isFileUrl)
+    .filter(URL.isFileUrl)
     .map(function(url) {
       return url
         .replace(/^https/,'http')
@@ -83,7 +35,7 @@ module.exports = function(request,cb) {
       };
     })
     .flatMap(function(release) {
-      return requestContentlength(release.url)
+      return request.contentlength(release.url)
         .map(function(contentLength) {
           return Object.merge(release, {
             size: contentLength
