@@ -3,22 +3,15 @@ var sugar = require('sugar');
 var URL = require('../lib/url');
 var Rx =require('../lib/rxnode');
 var request =require('../lib/rxrequest');
-
-function getEntries(url) {
-  return request.dom(url)
-    .flatMap(function($) {
-      return Rx.Observable.from(
-        $('th[headers=files_name_h] a.name')
-          .map(function(a) { return URL.resolve($.response.url, $(a).attr('href')); })
-        );
-    });
-}
+var sourceforge = require('../lib/sites/sourceforge');
 
 module.exports = function(_,cb) {
-  getEntries('http://sourceforge.net/projects/zorin-os/files/')
-    .filter(URL.isDirectoryUrl)
-    .flatMap(getEntries)
-    .filter(URL.isFileUrl)
+  var sourceforgeProject = sourceforge.project('zorin-os');
+  sourceforgeProject.files()
+    .filter(function(entry) { return entry.type === 'directory'; })
+    .flatMap(function(entry) { return sourceforgeProject.files(entry.path); })
+    .filter(function(entry) { return entry.type === 'file'; })
+    .map(function(entry) { return entry.url; })
     .map(function(url) {
       return url
         .replace(/^https/,'http')
