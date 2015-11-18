@@ -18,6 +18,7 @@ module.exports = function(request,callback) {
 
 			var archurl = distributionurl+arch+'/';
 			request.dom(archurl,function(err,$,response) {
+				if (err) { return callback(err); }
 				var versions = $('pre a').map(function(a) {
 					return (/^\d+(\.\d+)*/).exec(a.attr('href'));
 				}).compact().map(first);
@@ -25,6 +26,7 @@ module.exports = function(request,callback) {
 				async.map(versions,function(version,callback) {
 					var versionurl = archurl+version+'/';
 					request.dom(versionurl,function(err,$,response) {
+						if (err) { return callback(err); }
 						var isourls = $('pre a').map(function(a) {
 							return (/^.*\.iso$/).exec(a.attr('href'));
 						}).compact().map(first).map(function(iso) {
