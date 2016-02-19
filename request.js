@@ -83,6 +83,20 @@ function requestXmlDom(options,result) {
 	});
 }
 
+function requestJson(options, result) {
+	requestMirror(options, function(err, response, body) {
+		if (err) { return result(err); }
+		var jsonBody;
+		try {
+			jsonBody = JSON.parse(body);
+		} catch(e) {
+			result(e, jsonBody, response);
+			return;
+		}
+		result(null, jsonBody, response);
+	});
+};
+
 function requestContentLength(options,result) {
 	if (typeof options === 'string') {
 		options = { url: options };
@@ -128,5 +142,6 @@ cheerio.prototype.mapFilter = function(f) {
 module.exports = requestMirror;
 module.exports.text = requestText;
 module.exports.dom = requestDom;
+module.exports.json = requestJson;
 module.exports.xmldom = requestXmlDom;
 module.exports.contentlength = requestContentLength;
