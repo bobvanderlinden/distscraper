@@ -205,3 +205,8 @@ convert -background none $TMP/evolution.png -trim ${RESIZE[@]} $DST/evolution.pn
 retrieve http://storage.antergos.com/art/antergos-logo.svg $TMP/antergos.svg
 xmlstarlet ed -d "/_:svg/_:g/*[@id!='g5349']" -d "/_:svg/_:g/_:g[@id='g5349']/*[@id='text5357']" $TMP/antergos.svg >| $TMP/antergos_logo.svg
 inkscape --export-png=$DST/antergos.png --export-area-drawing --export-width=${SIZE} --export-height=${SIZE} $TMP/antergos_logo.svg
+
+# Urix OS
+retrieve http://softwarebakery.com/apps/drivedroid/files/urixos.svg $TMP/urixos.svg
+inkscape --export-png=$TMP/urixos.png $TMP/urixos.svg 
+convert -background none $TMP/urixos.png -trim ${RESIZE[@]} $DST/urixos.png
