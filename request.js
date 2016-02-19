@@ -62,7 +62,7 @@ function requestBase(options,result) {
 function requestText(options,result) {
 	requestMirror(options,function(err,response,body) {
 		if (err) { return result(err); }
-		result(null,body);
+		result(null,body,response);
 	});
 }
 
