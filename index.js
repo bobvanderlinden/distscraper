@@ -19,8 +19,10 @@ function includeDirectory(directoryPath) {
 }
 
 function includeScraper(scraperPath) {
-	var scraper = require('./' + scraperPath);
+	scraperPath = path.resolve('.', scraperPath);
+	var scraper = require(scraperPath);
 	scraper.path = scraperPath;
+	scraper.id = path.basename(scraperPath, '.js');
 	scrapers.push(scraper);
 }
 
@@ -43,7 +45,7 @@ if (process.stdout.isTTY && !program.nonhuman) {
 }
 
 if (!program.directory && !program.scraper) {
-	includeDirectory('scrapers');
+	includeDirectory(__dirname + '/scrapers');
 }
 
 var repositoryDefinitions = [
@@ -66,10 +68,10 @@ function showScrapers(scrapers) {
 		for(i=0;i<scrapers.length;i++) {
 			scrapers[i].index = i;
 			charm.push();
-			charm.write(scrapers[i].path);
+			charm.write(scrapers[i].id);
 			charm.pop();
 			charm.down(1);
-			statusOffset = Math.max(statusOffset, scrapers[i].path.length);
+			statusOffset = Math.max(statusOffset, scrapers[i].id.length);
 		}
 	} else {
 		for(i=0;i<scrapers.length;i++) {
@@ -87,7 +89,7 @@ function showScraperStatus(scraper,status) {
 		charm.write(status);
 		charm.pop();
 	} else {
-		console.log(scraper.path,':',status);
+		console.log(scraper.id,':',status);
 	}
 }
 
