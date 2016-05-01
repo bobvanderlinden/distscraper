@@ -34,7 +34,7 @@ module.exports = function(request,callback) {
 		});
 	}
 	
-	retrieveISOs('http://198.145.20.143/mageia/iso/',function(err,urls) {
+	retrieveISOs('http://149.20.37.36/mageia/iso/',function(err,urls) {
 		if (err) { return callback(err); }
 		async.map(urls,function(url,cb) {
 			var match = /\/Mageia-(\d+(\.\d+)*)-(x86_64|i586|dual)-[^\/]+\.iso$/ig.exec(url);

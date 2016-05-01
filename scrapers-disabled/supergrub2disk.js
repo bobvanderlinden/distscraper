@@ -8,6 +8,7 @@ module.exports = function(request,cb) {
 		if (err) { return cb(err); }
 		var urls = $('a')
 			.map(function(a) { return $(a).attr('href'); })
+			.map(function(url) { return url.replace(/^https:/, 'http:'); })
 			.filter(function(url) { return /super_grub2_disk_.*\.iso$/.test(url); })
 			.map(function(url) { return URL.resolve(response.url,url); })
 			.map(function(url) { return url.replace(/^https:/, 'http:'); });

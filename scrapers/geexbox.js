@@ -31,6 +31,7 @@ module.exports = function(request,callback) {
 				},callback);
 			});
 		},function(err,releases) {
+			if (err) { return callback(err); }
 			distribution.releases = releases.flatten();
 			callback(null,distribution);
 		});

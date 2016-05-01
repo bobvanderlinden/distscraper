@@ -4,7 +4,7 @@ var URL = require('url');
 
 function first(a) { return a[0]; }
 module.exports = function(request,callback) {
-	var distributionurl = 'http://198.145.20.143/gentoo/releases/';
+	var distributionurl = 'http://149.20.37.36/gentoo/releases/';
 	request.dom(distributionurl,function(err,$) {
 		var arches = ['x86','amd64'];
 		var distribution = {
@@ -18,6 +18,7 @@ module.exports = function(request,callback) {
 
 			var archurl = distributionurl+arch+'/';
 			request.dom(archurl,function(err,$,response) {
+				if (err) { return callback(err); }
 				var versions = $('pre a').map(function(a) {
 					return (/^\d+(\.\d+)*/).exec(a.attr('href'));
 				}).compact().map(first);
@@ -25,6 +26,7 @@ module.exports = function(request,callback) {
 				async.map(versions,function(version,callback) {
 					var versionurl = archurl+version+'/';
 					request.dom(versionurl,function(err,$,response) {
+						if (err) { return callback(err); }
 						var isourls = $('pre a').map(function(a) {
 							return (/^.*\.iso$/).exec(a.attr('href'));
 						}).compact().map(first).map(function(iso) {
@@ -48,6 +50,7 @@ module.exports = function(request,callback) {
 				});
 			});
 		},function(err,releases) {
+			if (err) { return callback(err); }
 			distribution.releases = releases.flatten();
 			callback(null,distribution);
 		});

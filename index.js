@@ -6,6 +6,9 @@ var request = require('./request');
 var program = require('commander');
 var mkdirp = require('mkdirp');
 var validation = require('./validation.js');
+var Rx = require('rx');
+
+Rx.config.longStackSupport = true;
 
 var scrapers = [];
 

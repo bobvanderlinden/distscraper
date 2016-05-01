@@ -62,7 +62,7 @@ function requestBase(options,result) {
 function requestText(options,result) {
 	requestMirror(options,function(err,response,body) {
 		if (err) { return result(err); }
-		result(null,body);
+		result(null,body,response);
 	});
 }
 
@@ -70,6 +70,7 @@ function requestDom(options,result) {
 	requestMirror(options,function(err,response,body) {
 		if (err) { return result(err); }
 		var $ = cheerio.load(body);
+		$.response = response;
 		result(null,$,response);
 	});
 }
@@ -81,6 +82,20 @@ function requestXmlDom(options,result) {
 		result(null,$,response);
 	});
 }
+
+function requestJson(options, result) {
+	requestMirror(options, function(err, response, body) {
+		if (err) { return result(err); }
+		var jsonBody;
+		try {
+			jsonBody = JSON.parse(body);
+		} catch(e) {
+			result(e, jsonBody, response);
+			return;
+		}
+		result(null, jsonBody, response);
+	});
+};
 
 function requestContentLength(options,result) {
 	if (typeof options === 'string') {
@@ -127,5 +142,6 @@ cheerio.prototype.mapFilter = function(f) {
 module.exports = requestMirror;
 module.exports.text = requestText;
 module.exports.dom = requestDom;
+module.exports.json = requestJson;
 module.exports.xmldom = requestXmlDom;
 module.exports.contentlength = requestContentLength;

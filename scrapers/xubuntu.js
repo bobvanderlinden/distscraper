@@ -6,6 +6,7 @@ function first(a) { return a[1]; }
 module.exports = function(request,callback) {
 	var distributionurl = 'http://cdimage.ubuntu.com/xubuntu/releases/';
 	request.dom(distributionurl,function(err,$) {
+		if (err) { return callback(err); }
 		var versions = $('a').map(function(a) { return (/^(\d+(\.\d+)+)\/$/).exec(a.attr('href')); }).compact().map(first);
 		var distribution = {
 			id: 'xubuntu',
@@ -32,6 +33,7 @@ module.exports = function(request,callback) {
 				},callback);
 			});
 		},function(err,releases) {
+			if (err) { return callback(err); }
 			distribution.releases = releases.flatten();
 			callback(null,distribution);
 		});
