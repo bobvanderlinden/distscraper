@@ -12,7 +12,7 @@ module.exports = function(request,cb) {
 				var match = /Peppermint-(\d+-\d+)-(\w+)\.iso$/.exec(url);
 				if (!match) { return null; }
 				return {
-					url: url,
+					url: url.replace(/^https:/g,'http:'),
 					version: match[1].replace('-','.'),
 					arch: match[2]
 				};
