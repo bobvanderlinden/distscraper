@@ -215,3 +215,7 @@ convert -background none $TMP/urixos.png -trim ${RESIZE[@]} $DST/urixos.png
 retrieve https://upload.wikimedia.org/wikipedia/commons/4/4b/Siduction_logo.svg $TMP/siduction.svg
 inkscape --export-png=$TMP/siduction.png $TMP/siduction.svg
 convert -background none $TMP/siduction.png -trim ${RESIZE[@]} $DST/siduction.png
+
+# boot-repair-disk
+retrieve http://a.fsdn.com/allura/p/boot-repair-cd/icon $TMP/bootrepairdisk.png
+convert -background none $TMP/bootrepairdisk.png -trim ${RESIZE[@]} $DST/bootrepairdisk.png
