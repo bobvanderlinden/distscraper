@@ -1,59 +1,50 @@
 var async = require('async');
 var sugar = require('sugar');
-var URL = require('url');
+var URL = require('../lib/url');
+var Rx =require('../lib/rxnode');
+var request =require('../lib/rxrequest');
+var filelisting = require('../lib/sites/filelisting');
 
-function first(a) { return a[0]; }
-module.exports = function(request,callback) {
-	var distributionurl = 'http://distfiles.gentoo.org/releases/';
-	request.dom(distributionurl,function(err,$) {
-		var arches = ['x86','amd64'];
-		var distribution = {
-			id: 'gentoo',
-			name: 'Gentoo',
-			tags: ['hybrid'],
-			url: 'http://www.gentoo.org/'
-		};
-
-		async.map(arches,function(arch,callback) {
-
-			var archurl = distributionurl+arch+'/';
-			request.dom(archurl,function(err,$,response) {
-				if (err) { return callback(err); }
-				var versions = $('pre a').map(function(a) {
-					return (/^\d+(\.\d+)*/).exec(a.attr('href'));
-				}).compact().map(first);
-
-				async.map(versions,function(version,callback) {
-					var versionurl = archurl+version+'/';
-					request.dom(versionurl,function(err,$,response) {
-						if (err) { return callback(err); }
-						var isourls = $('pre a').map(function(a) {
-							return (/^.*\.iso$/).exec(a.attr('href'));
-						}).compact().map(first).map(function(iso) {
-							return URL.resolve(response.url,iso);
-						});
-						async.map(isourls,function(isourl,callback) {
-							request.contentlength(isourl,function(err,contentlength) {
-								if (err) { return callback(err); }
-								var filename = /\/([^\/]+\.iso)$/.exec(isourl)[1];
-								callback(null,{
-									url: 'http://bouncer.gentoo.org/fetch/gentoo-'+version+'-livedvd/'+arch+'/'+filename,
-									arch: arch,
-									version: version,
-									size: contentlength
-								});
-							});
-						},callback);
-					});
-				},function(err,releases) {
-					callback(err,releases.flatten());
-				});
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases.flatten();
-			callback(null,distribution);
-		});
-	});
+module.exports = function(_,cb) {
+  filelisting.getEntries('http://distfiles.gentoo.org/releases/')
+    /* "amd64", "x86", ... */
+    .filter(function(entry) { return entry.type === 'directory'; })
+    .filter(function(entry) { return /^(amd64|x86)$/.test(entry.name); })
+    .flatMap(function(entry) { return filelisting.getEntries(entry.url); })
+    /* "20121221", "20160514", "12.1" */
+    .filter(function(entry) { return entry.type === 'directory'; })
+    .filter(function(entry) { return /^\d{8}$/.test(entry.name); })
+    .flatMap(function(entry) { return filelisting.getEntries(entry.url); })
+    /* "livedvd-amd64-multilib-20160514.iso", "livedvd-x86-amd64-32ul-20160514.iso", ... */
+    .filter(function(entry) { return entry.type === 'file'; })
+    .filter(function(entry) { return /\.iso$/.test(entry.url); })
+    .map(function(entry) {
+      var match = /^\w+-(\w+)-\w+-\w+-(\d{8})\.iso$/.exec(entry.name);
+      if (!match) { return null; }
+      return {
+        url: entry.url,
+        arch: match[1],
+        version: match[2]
+      };
+    })
+    .filter(function(entry) { return entry; })
+    .flatMap(function(release) {
+      return request.contentlength(release.url)
+        .map(function(contentLength) {
+          return Object.merge(release, {
+            size: contentLength
+          });
+        });
+    })
+    .toArray()
+    .map(function(releases) {
+      return {
+        id: 'gentoo',
+        name: 'Gentoo',
+        tags: ['hybrid'],
+        url: 'https://www.gentoo.org/',
+        releases: releases
+      };
+    })
+    .subscribeCallback(cb);
 };
-
