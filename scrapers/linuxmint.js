@@ -3,7 +3,7 @@ var sugar = require('sugar');
 
 function first(a) { return a[0]; }
 module.exports = function(request,callback) {
-	var distributionurl = 'http://149.20.37.36/linuxmint/stable/';
+	var distributionurl = 'https://ftp.heanet.ie/mirrors/linuxmint.com/stable/';
 	request.dom(distributionurl,function(err,$) {
 		var versions = $('pre a').map(function(a) {
 			return (/^\d+(\.\d+)*/).exec(a.attr('href'));
