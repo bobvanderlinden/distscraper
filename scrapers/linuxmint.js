@@ -32,7 +32,7 @@ module.exports = function(request,callback) {
 						if (!contentLength) { return callback(null,null); }
 						var release = {
 							version: version,
-							url: url,
+							url: url.replace(/^https:/, 'http:'),
 							size: contentLength
 						};
 						var archMatch = /[-\.](32bit|64bit)[-\.]/.exec(release.url);
