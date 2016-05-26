@@ -1,63 +1,49 @@
 var async = require('async');
 var sugar = require('sugar');
-var URL = require('url');
+var URL = require('../lib/url');
+var Rx =require('../lib/rxnode');
+var request =require('../lib/rxrequest');
+var filelisting = require('../lib/sites/filelisting');
 
-function first(a) { return a[0]; }
-module.exports = function(request,callback) {
-	function retrieveISOs(url, cb) {
-		request.dom(url, function(err,$,response) {
-			if (err) { return cb(err); }
-			var urls = $('pre a').map(function(a) {
-				var url = a.attr('href');
-				if (!url || (/^\.|^\//).test(url)) { return null; }
-				return URL.resolve(response.url, a.attr('href'));
-			}).compact();
-			async.parallel([
-				function(cb) {
-					var subdirs = urls.filter(function(url) { return (/\/$/).test(url); });
-					async.map(subdirs, function(subdir, cb) {
-						retrieveISOs(subdir,cb);
-					}, function(err,results) {
-						if (err) { cb(err); }
-						if (results.length > 0) { results = results.flatten(); }
-						cb(null,results);
-					});
-				},
-				function(cb) {
-					var isos = urls.filter(function(url) { return (/\.iso$/).test(url); });
-					cb(null, isos);
-				}
-			], function(err,results) {
-				if (err) { return cb(err); }
-				cb(null,results.flatten());
-			});
-		});
-	}
-	
-	retrieveISOs('http://cdimage.debian.org/mirror/mageia/iso/',function(err,urls) {
-		if (err) { return callback(err); }
-		async.map(urls,function(url,cb) {
-			var match = /\/Mageia-(\d+(\.\d+)*)-(x86_64|i586|dual)-[^\/]+\.iso$/ig.exec(url);
-			if (!match) { return cb(null,null); }
-			request.contentlength(url,function(err,contentLength) {
-				if (err) { return cb(err); }
-				cb(null,{
-					url: url,
-					version: match[1],
-					arch: match[3],
-					size: contentLength
-				});
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			callback(null,{
-				id: 'mageia',
-				name: 'Mageia',
-				tags: ['hybrid'],
-				url: 'http://www.mageia.org/',
-				releases: releases.compact()
-			});
-		});
-	});
+module.exports = function(_,cb) {
+  filelisting.getEntries('http://cdimage.debian.org/mirror/mageia/iso/')
+    /* "4.1", "5" */
+    .filter(function(entry) { return entry.type === 'directory'; })
+    .filter(function(entry) { return /^\d+(\.\d+)*$/.test(entry.name); })
+    .flatMap(function(entry) { return filelisting.getEntries(entry.url); })
+    /* "Mageia-5-x86_64-DVD", "Mageia-5-LiveDVD-KDE4-x86_64-DVD", ... */
+    .filter(function(entry) { return entry.type === 'directory'; })
+    .flatMap(function(entry) { return filelisting.getEntries(entry.url); })
+    /* "Mageia-5-LiveDVD-KDE4-x86_64-DVD.iso" */
+    .filter(function(entry) { return entry.type === 'file'; })
+    .filter(function(entry) { return /\.iso$/.test(entry.url); })
+    .map(function(entry) {
+      var match = /^Mageia-(\d+(?:\.\d+)*)-\w+-\w+-(x86_64|i586)-.*\.iso$/.exec(entry.name);
+      if (!match) { return null; }
+      return {
+        url: entry.url,
+        arch: match[2],
+        version: match[1]
+      };
+    })
+    .filter(function(entry) { return entry; })
+    .flatMap(function(release) {
+      return request.contentlength(release.url)
+        .map(function(contentLength) {
+          return Object.merge(release, {
+            size: contentLength
+          });
+        });
+    })
+    .toArray()
+    .map(function(releases) {
+      return {
+        id: 'mageia',
+        name: 'Mageia',
+        tags: ['hybrid'],
+        url: 'http://www.mageia.org/',
+        releases: releases
+      };
+    })
+    .subscribeCallback(cb);
 };
-
