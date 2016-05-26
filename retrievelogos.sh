@@ -210,3 +210,8 @@ inkscape --export-png=$DST/antergos.png --export-area-drawing --export-width=${S
 retrieve http://softwarebakery.com/apps/drivedroid/files/urixos.svg $TMP/urixos.svg
 inkscape --export-png=$TMP/urixos.png $TMP/urixos.svg 
 convert -background none $TMP/urixos.png -trim ${RESIZE[@]} $DST/urixos.png
+
+# Siduction
+retrieve https://upload.wikimedia.org/wikipedia/commons/4/4b/Siduction_logo.svg $TMP/siduction.svg
+inkscape --export-png=$TMP/siduction.png $TMP/siduction.svg
+convert -background none $TMP/siduction.png -trim ${RESIZE[@]} $DST/siduction.png
