@@ -34,7 +34,7 @@ module.exports = function(request,callback) {
 		});
 	}
 	
-	retrieveISOs('http://149.20.37.36/mageia/iso/',function(err,urls) {
+	retrieveISOs('http://cdimage.debian.org/mirror/mageia/iso/',function(err,urls) {
 		if (err) { return callback(err); }
 		async.map(urls,function(url,cb) {
 			var match = /\/Mageia-(\d+(\.\d+)*)-(x86_64|i586|dual)-[^\/]+\.iso$/ig.exec(url);
