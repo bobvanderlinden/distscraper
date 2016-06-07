@@ -14,9 +14,13 @@ module.exports = function(_,cb) {
   filelisting.getEntries('https://nixos.org/releases/nixos/')
     .filter(function(entry) { return entry.type === 'directory'; })
     .filter(function(entry) { return /^\d+\.\d+(-small)?/.test(entry.name); })
-    .flatMap(function(entry) { return filelisting.getEntries(entry.url); })
-    .filter(function(entry) { return entry.type === 'directory'; })
-    .filter(function(entry) { return /^nixos-(\d+\.\d+\.\d+)/.test(entry.name); })
+    .flatMap(function(entry) {
+      // Take the latest release of each version.
+      return filelisting.getEntries(entry.url)
+        .filter(function(entry) { return entry.type === 'directory'; })
+        .filter(function(entry) { return /^nixos-(\d+\.\d+\.\d+)/.test(entry.name); })
+        .takeLast(1);
+    })
     .flatMap(function(entry) { return filelisting.getEntries(entry.url); })
     .map(function(entry) { return entry.url; })
     .filter(function(url) {
