@@ -30,19 +30,8 @@ program
 	.option('-d, --directory <path>', 'Include directory of scrapers',includeDirectory)
 	.option('-s, --scraper <path>', 'Include specific scraper',includeScraper)
 	.option('-o, --output <outputdir>', 'Output directory','out')
-	.option('-n, --nonhuman', 'Don\'t show the status of scrapers interactively')
 	.parse(process.argv);
 
-
-var charm;
-// Enable charm is there is an TTY
-if (process.stdout.isTTY && !program.nonhuman) {
-	charm = require('charm')();
-	charm.pipe(process.stdout);
-	charm.reset();
-} else {
-	charm = null;
-}
 
 if (!program.directory && !program.scraper) {
 	includeDirectory(__dirname + '/scrapers');
@@ -63,34 +52,13 @@ var statusOffset = 0;
 
 function showScrapers(scrapers) {
 	var i;
-	if (charm) {
-		statusOffset = 0;
-		for(i=0;i<scrapers.length;i++) {
-			scrapers[i].index = i;
-			charm.push();
-			charm.write(scrapers[i].id);
-			charm.pop();
-			charm.down(1);
-			statusOffset = Math.max(statusOffset, scrapers[i].id.length);
-		}
-	} else {
-		for(i=0;i<scrapers.length;i++) {
-			showScraperStatus(scrapers[i],'starting');
-		}
+	for(i=0;i<scrapers.length;i++) {
+		showScraperStatus(scrapers[i],'starting');
 	}
 }
 
 function showScraperStatus(scraper,status) {
-	if (charm) {
-		charm.push();
-		charm.up(scrapers.length-scraper.index);
-		charm.right(statusOffset+1);
-		charm.erase('end');
-		charm.write(status);
-		charm.pop();
-	} else {
-		console.log(scraper.id,':',status);
-	}
+	console.log(scraper.id,':',status);
 }
 
 var scraperQueue = async.queue(runScraper,2);
