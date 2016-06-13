@@ -9,6 +9,7 @@ var validation = require('./validation.js');
 var Rx = require('rx');
 
 var scrapers = [];
+var mergeFiles = [];
 function includeDirectory(directoryPath) {
 	fs.readdirSync(directoryPath).map(function(scraperName) {
 		return path.join(directoryPath,scraperName);
@@ -23,10 +24,14 @@ function includeScraper(scraperPath) {
 	scrapers.push(scraper);
 }
 
+function mergeFile(mergePath) {
+	mergeFiles.push(mergePath);
+}
+
 program
 	.option('-d, --directory <path>', 'Include directory of scrapers',includeDirectory)
 	.option('-s, --scraper <path>', 'Include specific scraper',includeScraper)
-	.option('-o, --output <outputdir>', 'Output directory','out')
+	.option('-m, --merge <path>', 'Merge existing results with the scraped results.',mergeFile)
 	.parse(process.argv);
 
 
@@ -68,11 +73,15 @@ function getDistributionFilePath(distribution) {
 	return 'scraper.' + distribution.id + '.json';
 }
 
-function persistDistribution(distribution) {
+function resolveDistributionReleases(distribution) {
 	return distribution.releases.toArray()
 		.map(releases => Object.merge(distribution, {
 			releases: releases
-		}))
+		}));
+}
+
+function persistDistribution(distribution) {
+	return distribution
 		.flatMap(distribution => {
 			var jsonData = JSON.stringify(distribution);
 			var filePath = getDistributionFilePath(distribution);
@@ -103,7 +112,7 @@ function loadDistributionResults(distributionResults) {
 		.flatMap(distribution => loadDistributionResult(distribution.id));
 }
 
-function loadPreviousDistributions() {
+function loadDistributionsFromFile(path) {
 	return Rx.Observable.create(function(observer) {
 		var completed = false;
 		var StreamArray = require("stream-json/utils/StreamArray");
@@ -125,7 +134,7 @@ function loadPreviousDistributions() {
 			completed = true;
 		});
 
-		fs.createReadStream('koek.json')
+		fs.createReadStream(path)
 			.on('error', function(err) {
 				console.error(err);
 				observer.onCompleted();
@@ -133,6 +142,12 @@ function loadPreviousDistributions() {
 			})
 			.pipe(stream.input);
 	});
+}
+
+function loadMergeFiles() {
+	return Rx.Observable.from(mergeFiles)
+		.concatMap(mergeFile => loadDistributionsFromFile(mergeFile))
+		.distinct(distribution => distribution.id);
 }
 
 function intersperse(observable, separator) {
@@ -227,23 +242,66 @@ function writeDistributions(filePath, distributions) {
 var rxMkdirp = Rx.Observable.fromNodeCallback(mkdirp);
 
 
+function writeDistributionsToFile(distributions, filePath) {
+	return distributions.toJsonArray().doWriteFile(filePath).reduce(_ => true, true);
+}
+
+function writeRepositories(distributions) {
+	return Rx.Observable.from(repositoryDefinitions)
+		.flatMap(repositoryDefinition => distributions
+			.filter(repositoryDefinition.filter)
+			.toJsonArray()
+			.doWriteFile(repositoryDefinition.name + '.json')
+		)
+		.reduce(_ => true, true);
+}
+
+function writeAll(distributions) {
+	return distributions
+		.toJsonArray()
+		.doWriteFile('all.json');
+}
+
 Rx.Observable.from(scrapers)
 	.map(scraper => getRxScraper(scraper))
+	.doOnNext(scraper => {
+		console.log('Loading', scraper.id,'...');
+	})
 	.merge(1)
-	.concatMap(distribution => persistDistribution(distribution))
-	.filter(distributionResult => distributionResult.status === 'ok')
-	.map(distributionResult => distributionResult.result)
+	.doOnNext(distribution => {
+		console.log('Resolving', distribution.id,'...');
+	})
+	.concatMap(distribution => resolveDistributionReleases(distribution)
+		.catch(err => Object.merge(distribution, {
+			error: err,
+			releases: []
+		}))
+	)
+	.doOnNext(distribution => {
+		if (distribution.error) {
+			console.log('Error    ', distribution.id);
+		} else {
+			console.log('Resolved ', distribution.id);
+		}
+	})
+	.filter(distribution => !distribution.error)
 	.reduceConcat((state, distribution) => {
 		return state.concat([distribution.id]);
 	}, [], state => {
-		return loadPreviousDistributions()
+		// Concat the distributions from mergeFiles that weren't found by the current run.
+		return loadMergeFiles()
 			.filter(distribution => state.indexOf(distribution.id) === -1);
 	})
-	.toJsonArray()
-	.doWriteFile('output.json')
+	.publish(distributions => Rx.Observable.merge(
+		writeRepositories(distributions),
+		writeAll(distributions)
+	))
+	.ignoreElements()
 	.subscribe(
-		result => process.stdout.write(result),
-		err => console.error('Error:', err),
+		result => {},
+		err => {
+			console.error('Error:', err);
+		},
 		() => {
 			console.log('done');
 		}
