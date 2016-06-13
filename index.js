@@ -41,6 +41,10 @@ if (!program.directory && !program.scraper) {
 
 var repositoryDefinitions = [
 	{
+		name: 'all',
+		filter: function(distribution) { return true; }
+	},
+	{
 		name: 'main',
 		filter: function(distribution) { return distribution.tags.indexOf('hybrid') >= 0; }
 	},
@@ -69,10 +73,6 @@ function getRxScraper(scraper) {
 	}
 }
 
-function getDistributionFilePath(distribution) {
-	return 'scraper.' + distribution.id + '.json';
-}
-
 function resolveDistributionReleases(distribution) {
 	return distribution.releases.toArray()
 		.map(releases => Object.merge(distribution, {
@@ -80,32 +80,7 @@ function resolveDistributionReleases(distribution) {
 		}));
 }
 
-function persistDistribution(distribution) {
-	return distribution
-		.flatMap(distribution => {
-			var jsonData = JSON.stringify(distribution);
-			var filePath = getDistributionFilePath(distribution);
-			return Rx.Observable.fromNodeCallback(fs.writeFile)(filePath, jsonData)
-				.map(_ => ({
-					id: distribution.id,
-					status: 'ok',
-					path: filePath,
-					result: distribution
-				}));
-		})
-		.catch(err => Rx.Observable.just({
-			id: distribution.id,
-			status: 'error',
-			error: err
-		}));
-}
-
 var rxReadFile = Rx.Observable.fromNodeCallback(fs.readFile);
-
-function loadDistributionResult(distributionId) {
-	return rxReadFile(getDistributionFilePath({ id: distributionId }))
-		.map(content => JSON.parse(content.toString()));
-}
 
 function loadDistributionResults(distributionResults) {
 	return Rx.Observable.from(distributionResults)
@@ -256,17 +231,11 @@ function writeRepositories(distributions) {
 		.reduce(_ => true, true);
 }
 
-function writeAll(distributions) {
-	return distributions
-		.toJsonArray()
-		.doWriteFile('all.json');
-}
-
 Rx.Observable.from(scrapers)
-	.map(scraper => getRxScraper(scraper))
 	.doOnNext(scraper => {
 		console.log('Loading', scraper.id,'...');
 	})
+	.map(scraper => getRxScraper(scraper))
 	.merge(1)
 	.doOnNext(distribution => {
 		console.log('Resolving', distribution.id,'...');
@@ -292,10 +261,7 @@ Rx.Observable.from(scrapers)
 		return loadMergeFiles()
 			.filter(distribution => state.indexOf(distribution.id) === -1);
 	})
-	.publish(distributions => Rx.Observable.merge(
-		writeRepositories(distributions),
-		writeAll(distributions)
-	))
+	.publish(distributions => writeRepositories(distributions))
 	.ignoreElements()
 	.subscribe(
 		result => {},
