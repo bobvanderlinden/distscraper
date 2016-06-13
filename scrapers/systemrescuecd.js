@@ -1,49 +1,30 @@
 var async = require('async');
 var sugar = require('sugar');
 var URL = require('url');
+var request =require('../lib/rxrequest');
+var sourceforge = require('../lib/sites/sourceforge');
 
-module.exports = function(request,cb) {
-	var url = 'http://sourceforge.net/projects/systemrescuecd/files/sysresccd-x86/';
-	request.dom(url,function(err,$,response) {
-		if (err) { return cb(err); }
-		var folders = $('th[headers=files_name_h] a.name')
-			.map(function(a) { return URL.resolve(response.url,$(a).attr('href')); });
-		async.concat(folders,function(url,cb) {
-			request.dom(url,function(err,$,response) {
-				if (err) { return cb(err); }
-				async.map($('th[headers=files_name_h] a.name').toArray(),function(a,cb) {
-					a = $(a);
-					var url = URL.resolve(response.url,a.attr('href'))
-						.replace(/^https/,'http')
-						.replace(/\/download$/,'');
-					if (!/\.iso$/.test(url)) {
-						return cb(null,null);
-					}
-					var arch = /x86/.exec(url)[0];
-					var version = /\d+(\.\d+)+/.exec(url)[0];
-					request.contentlength(url,function(err,size) {
-						if (err) { return cb(err); }
-						cb(null,{
-							url: url,
-							arch: arch,
-							version: version,
-							size: size
-						});
-					});
-				},function(err,releases) {
-					if (err) { return cb(err); }
-					cb(null,releases.compact());
-				});
-			});
-		},function(err,releases) {
-			if (err) { return cb(err); }
-			cb(null,{
-				id: 'systemrescuecd',
-				name: 'SystemRescueCD',
-				tags: ['nonhybrid'],
-				url: 'http://www.sysresccd.org/',
-				releases: releases
-			});
-		});
-	});
+var sourceforgeProject = sourceforge.project('systemrescuecd');
+
+module.exports = {
+	id: 'systemrescuecd',
+	name: 'SystemRescueCD',
+	tags: ['nonhybrid'],
+	url: 'http://www.sysresccd.org/',
+	releases: sourceforgeProject.files('sysresccd-x86')
+		.filter(entry => entry.type === 'directory')
+		.take(1)
+		.flatMap(directory => sourceforgeProject.files(directory.path))
+		.filter(entry => /\.iso$/.test(entry.name))
+		.take(1)
+		.map(entry => ({
+			url: entry.url,
+			arch: 'x86',
+			version: /\d+(?:\.\d+)+/.exec(entry.url)[0]
+		}))
+		.flatMap(release => request.contentlength(release.url)
+			.map(contentLength => Object.merge(release, {
+				size: contentLength
+			}))
+		)
 };

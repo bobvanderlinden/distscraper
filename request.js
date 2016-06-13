@@ -16,6 +16,9 @@ function getRequestQueue(host) {
 	var requestQueue = requestQueues[host];
 	if (!requestQueue) {
 		requestQueue = requestQueues[host] = async.queue(request,1);
+		requestQueue.drain = function() {
+			delete requestQueues[host];
+		};
 	}
 	return requestQueue;
 }
@@ -26,10 +29,10 @@ function requestMirror(options,result) {
 	requestBase(options, function(err, response, body) {
 		if (err || response.statusCode >= 400) {
 			if (mirrorUrls.length > 0) {
-				return requestMirror(Object.merge({ url: mirrorUrls.shift(), mirrors: mirrorUrls }), result);
+				requestMirror(Object.merge(options, { url: mirrorUrls.shift(), mirrors: mirrorUrls }), result);
 			}
 		}
-		return result(err, response, body);
+		result(err, response, body);
 	});
 }
 
@@ -50,10 +53,6 @@ function requestBase(options,result) {
 			return result(err);
 		}
 		debug('response', options.url, response.statusCode, response.statusMessage);
-		if (response.statusCode === 302) { // Handle redirects after POST
-			requestQueue.pushRequest({url:response.headers.location},handleResponse);
-			return;
-		}
 		response.url = options.url;
 		result(null,response,body);
 	}
@@ -72,6 +71,9 @@ function requestDom(options,result) {
 		var $ = cheerio.load(body);
 		$.response = response;
 		result(null,$,response);
+		if (typeof global.gc === 'function') {
+			global.gc();
+		}
 	});
 }
 
