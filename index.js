@@ -80,13 +80,6 @@ function resolveDistributionReleases(distribution) {
 		}));
 }
 
-var rxReadFile = Rx.Observable.fromNodeCallback(fs.readFile);
-
-function loadDistributionResults(distributionResults) {
-	return Rx.Observable.from(distributionResults)
-		.flatMap(distribution => loadDistributionResult(distribution.id));
-}
-
 function loadDistributionsFromFile(path) {
 	return Rx.Observable.create(function(observer) {
 		var completed = false;
@@ -111,7 +104,8 @@ function loadDistributionsFromFile(path) {
 
 		fs.createReadStream(path)
 			.on('error', function(err) {
-				console.error(err);
+				console.error('Attempting to load',path,'has failed with error:', err);
+				console.error('Skipping ', path);
 				observer.onCompleted();
 				completed = true;
 			})
