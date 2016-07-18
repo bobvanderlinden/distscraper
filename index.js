@@ -49,7 +49,7 @@ var repositoryDefinitions = [
 		filter: function(distribution) { return distribution.tags.indexOf('hybrid') >= 0; }
 	},
 	{
-		name: 'nonhybrid',
+		name: 'syslinux',
 		filter: function(distribution) { return distribution.tags.indexOf('nonhybrid') >= 0; }
 	}
 ];
