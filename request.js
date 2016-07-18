@@ -7,7 +7,8 @@ var URL = require('url');
 var debug = require('debug')('distscraper:request');
 var mirrors = require('./mirrors.js');
 var request = request.defaults({
-	method: 'GET'
+	method: 'GET',
+	removeRefererHeader: true
 });
 
 var requestQueues = {};
