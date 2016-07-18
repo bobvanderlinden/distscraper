@@ -31,6 +31,7 @@ function requestMirror(options,result) {
 		if (err || response.statusCode >= 400) {
 			if (mirrorUrls.length > 0) {
 				requestMirror(Object.merge(options, { url: mirrorUrls.shift(), mirrors: mirrorUrls }), result);
+				return;
 			}
 		}
 		result(err, response, body);
