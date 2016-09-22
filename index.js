@@ -248,7 +248,7 @@ Rx.Observable.from(scrapers)
 	)
 	.doOnNext(distribution => {
 		if (distribution.error) {
-			console.log('Error    ', distribution.id);
+			console.log('Error    ', distribution.id, distribution.error);
 		} else {
 			console.log('Resolved ', distribution.id);
 		}
