@@ -5,32 +5,17 @@ var Rx =require('../lib/rxnode');
 var request =require('../lib/rxrequest');
 
 module.exports = function(_,cb) {
-    request.dom('https://antergos.com/download/')
-        .flatMap(function($) {
-            return $('h2.entry-title a')
-                .map(function(a) {
-                    return {
-                        title: $(a).text().trim(),
-                        url: $(a).attr('href')
-                    };
-                });
-        })
-        .filter(function(post) {
-            return /ISO Refresh/.test(post.title);
-        })
-        .flatMap(function(post) {
-            return request.dom(post.url);
-        })
+    request.dom('https://antergos.com/try-it')
         .flatMap(function($) {
             return $('a')
                 .map(function(a) { return $(a).attr('href'); });
         })
         .filter(function(url) {
-            return /\.iso\.md5$/.test(url);
+            return /\.iso\.sig$/.test(url);
         })
         .distinct()
         .map(function(url) {
-            return /^https?:\/\/.*\/antergos-\w+-(\d{4}.\d{2}.\d{2})-(x86_64|i686).iso/.exec(url)
+            return /^https?:\/\/.*\/antergos(-\w+)?-(\d{4}.\d{2}.\d{2})-(x86_64|i686).iso/.exec(url)
         })
         .filter(function(match) {
             return match;
