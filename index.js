@@ -229,7 +229,13 @@ Rx.Observable.from(scrapers)
 	.doOnNext(scraper => {
 		console.log('Loading', scraper.id,'...');
 	})
-	.map(scraper => getRxScraper(scraper))
+	.map(scraper => getRxScraper(scraper)
+		.catch(err => Rx.Observable.just({
+			id: scraper.id,
+			error: err,
+			releases: Rx.Observable.empty()
+		}))
+	)
 	.merge(1)
 	.doOnNext(distribution => {
 		console.log('Resolving', distribution.id,'...');
