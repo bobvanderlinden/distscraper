@@ -261,6 +261,7 @@ Rx.Observable.from(scrapers)
 		result => {},
 		err => {
 			console.error('Error:', err);
+			process.exitCode = 1;
 		},
 		() => {
 			console.log('done');
