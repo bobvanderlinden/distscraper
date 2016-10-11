@@ -11,17 +11,18 @@ function log(o) {
 }
 
 module.exports = function(_,cb) {
-  filelisting.getEntries('https://nixos.org/releases/nixos/')
-    .filter(function(entry) { return entry.type === 'directory'; })
-    .filter(function(entry) { return /^\d+\.\d+(-small)?/.test(entry.name); })
-    .flatMap(function(entry) {
-      // Take the latest release of each version.
-      return filelisting.getEntries(entry.url)
-        .filter(function(entry) { return entry.type === 'directory'; })
-        .filter(function(entry) { return /^nixos-(\d+\.\d+\.\d+)/.test(entry.name); })
-        .takeLast(1);
-    })
-    .flatMap(function(entry) { return filelisting.getEntries(entry.url); })
+  filelisting.getEntries('https://nixos.org/channels/')
+    .filter(function(entry) { return /^nixos-\d+\.\d+(-small)?/.test(entry.name); })
+    .flatMap(function(entry) { return request.dom(entry.url); })
+    .flatMap($ =>
+      $('a')
+        .map(anchor => $(anchor))
+        .map(anchor => ({
+          name: anchor.text(),
+          href: anchor.attr('href'),
+          url: URL.resolve($.response.request.uri.href, anchor.attr('href'))
+        }))
+    )
     .map(function(entry) { return entry.url; })
     .filter(function(url) {
       return /\.iso$/.test(url);
