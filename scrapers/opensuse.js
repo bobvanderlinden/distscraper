@@ -1,44 +1,47 @@
 var async = require('async');
 var sugar = require('sugar');
+var URL = require('../lib/url');
+var Rx = require('../lib/rxnode');
+var request = require('../lib/rxrequest');
+var filelisting = require('../lib/sites/filelisting');
 
-function first(a) { return a[1]; }
-module.exports = function(request,callback) {
-	var distributionurl = 'http://download.opensuse.org/distribution/';
-	request.dom(distributionurl,function(err,$) {
-		var versions = $('pre a').map(function(a) {
-			return (/^(\d+(\.\d+)+)\/$/).exec(a.attr('href'));
-		}).compact().map(first);
-		var distribution = {
-			id: 'opensuse',
-			name: 'OpenSUSE',
-			tags: ['hybrid'],
-			url: 'http://www.opensuse.org/'
-		};
-
-		async.map(versions,function(version,callback) {
-			var isosurl = distributionurl+version+'/iso/';
-			request.dom(isosurl,function(err,$) {
-				if (err) { return callback(err); }
-				var releases = $('pre a').map(function(a) {
-					return a.attr('href');
-				}).compact().filter(function(filename) {
-					return (/\.iso$/).test(filename);
-				}).compact().map(function(filename) {
-					return {version: version,url:isosurl+filename};
-				});
-				async.map(releases,function(release,callback) {
-					request.contentlength(release.url,function(err,contentlength) {
-						if (err) { return callback(err); }
-						release.size = contentlength;
-						callback(null,release);
-					});
-				},callback);
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases.flatten();
-			callback(null,distribution);
-		});
-	});
+module.exports = function (_, cb) {
+  Rx.Observable.merge(
+    filelisting.getEntries('http://download.opensuse.org/distribution/leap/'),
+    filelisting.getEntries('http://download.opensuse.org/distribution/'))
+    .filter(entry => /^\d+(\.\d+)*$/.test(entry.name))
+    .flatMap(entry => filelisting.getEntries(entry.url))
+    .filter(entry => entry.type === 'directory' && entry.name === 'iso')
+    .flatMap(entry => filelisting.getEntries(entry.url))
+    .filter(entry => entry.type === 'file')
+    .filter(entry => /\.iso$/.test(entry.name))
+    .map(entry => {
+      const match = /^openSUSE(-Leap)?-(\d+(?:\.\d+)*)-(\w+)-(\w+).iso$/.exec(entry.name)
+      if (!match) {
+        return null
+      }
+      const flavor = match[1]
+      const version = match[2]
+      const type = match[3]
+      const arch = match[4]
+      return {
+        url: entry.url,
+        arch: arch,
+        version: version
+      }
+    })
+    .filter(release => !!release) // Remove nulls
+    .flatMap(release => request.contentlength(release.url)
+      .map(contentLength => Object.merge(release, { size: contentLength }))
+    )
+    .toArray()
+    .map(releases => ({
+      id: 'opensuse',
+      name: 'OpenSUSE',
+      tags: ['hybrid'],
+      url: 'https://www.opensuse.org/',
+      releases: releases
+    }))
+    .subscribeCallback(cb);
 };
 
