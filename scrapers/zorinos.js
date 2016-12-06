@@ -20,7 +20,7 @@ module.exports = function (_, cb) {
     .map(url => ({
       url: url,
       arch: (/32|64/.exec(url) || ['32'])[0],
-      version: /zorin\-os\-(\d+(\.\d+)*)\-/g.exec(url)[1]
+      version: /zorin\-os\-(\d+(\.\d+)*)\-/gi.exec(url)[1]
     }))
     .flatMap(release => request.contentlength(release.url)
       .map(contentLength => Object.merge(release, {
