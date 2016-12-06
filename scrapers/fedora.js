@@ -1,76 +1,47 @@
 var async = require('async');
 var sugar = require('sugar');
+var URL = require('../lib/url');
+var Rx = require('../lib/rxnode');
+var request = require('../lib/rxrequest');
+var filelisting = require('../lib/sites/filelisting');
 
-function first(a) { return a[0]; }
-module.exports = function(request,callback) {
-	var distributionurl = 'http://dl.fedoraproject.org/pub/fedora/linux/releases/';
-	request.dom(distributionurl,function(err,$) {
-		var versions = $('a').map(function(a) {
-			return (/^\d+/).exec(a.attr('href'));
-		}).compact().map(first);
-		var distribution = {
-			id: 'fedora',
-			name: 'Fedora',
-			tags: ['hybrid'],
-			url: 'http://fedoraproject.org/'
-		};
-
-		function requestISOs(version,isourl,callback) {
-			request.dom(isourl,p(function(err,$) {
-				if (err) { return callback(err); }
-				distribution.releases.push.apply(distribution.releases,$('a').map(function(a) {
-					return (/^.*\.iso$/).exec(a.attr('href'));
-				}).compact().map(first).map(function(filename) {
-					return {version: version,url:isourl+filename};
-				}));
-				callback();
-			}));
-		}
-		async.map(versions,function(version,callback) {
-			var versionurls = [
-				'/Live/i686/',
-				'/Live/i386/',
-				'/Live/x86_64/',
-				'/Fedora/i386/iso/',
-				'/Fedora/x86_64/iso/'
-			].map(function(subpath){
-				return distributionurl+version+subpath;
-			});
-
-
-			function requestISOs(versionurl,callback) {
-				request.dom(versionurl,function(err,$) {
-					if (err) { return callback(err); }
-					var releases = $('a').map(function(a) {
-						return a.attr('href');
-					}).compact().filter(function(filename) {
-						return (/\.iso$/).test(filename);
-					}).map(function(filename) {
-						return {
-							version: version,
-							url:versionurl+filename,
-							arch: /i686|i386|x86_64/.exec(filename)[0]
-						};
-					});
-					async.map(releases,function(release,callback) {
-						request.contentlength(release.url,function(err,contentlength) {
-							if (err) { return callback(err); }
-							release.size = contentlength;
-							callback(null,release);
-						});
-					},callback);
-				});
-			}
-
-			async.map(versionurls,requestISOs,function(err,isos) {
-				if (err) { return callback(err); }
-				callback(null,isos.flatten());
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases.flatten();
-			callback(null,distribution);
-		});
-	});
+module.exports = function (_, cb) {
+  filelisting.getEntries('http://dl.fedoraproject.org/pub/fedora/linux/releases/')
+    .filter(entry => /^\d+$/.test(entry.name))
+    .flatMap(entry => filelisting.getEntries(entry.url))
+    .filter(entry => entry.type === 'directory' && /^(Everything|Spins|Live|Fedora)$/.test(entry.name))
+    .flatMap(entry => filelisting.getEntries(entry.url))
+    .filter(entry => entry.type === 'directory' && /^(i386|i686|x86_64)$/.test(entry.name))
+    .flatMap(entry => filelisting.getEntries(entry.url))
+    .filter(entry => entry.type === 'file' || /^(iso)$/.test(entry.name))
+    .flatMap(entry => {
+      if (entry.type === 'file') { return [entry] }
+      else return filelisting.getEntries(entry.url)
+    })
+    .filter(entry => entry.type === 'file' && /\.iso$/.test(entry.name))
+    .map(entry => {
+      const match = /Fedora-([A-z0-9\-]+)-(i386|i686|x86_64)-(\d+)-(\d+(?:\.\d+)*).iso/.exec(entry.name)
+      const flavor = match[1]
+      const arch = match[2]
+      const versionMajor = match[3]
+      const versionMinor = match[4]
+      return {
+        url: entry.url,
+        arch: arch,
+        version: `${versionMajor}.${versionMinor}`
+      }
+    })
+    .flatMap(release => request.contentlength(release.url)
+      .map(contentLength => Object.merge(release, { size: contentLength }))
+    )
+    .toArray()
+    .map(releases => ({
+      id: 'fedora',
+      name: 'Fedora',
+      tags: ['hybrid'],
+      url: 'https://getfedora.org/',
+      releases: releases
+    }))
+    .subscribeCallback(cb);
 };
 
