@@ -14,7 +14,7 @@ module.exports = function(_,cb) {
 		.filter(release => (/\.iso$/).test(release.url))
 		.doOnNext(release => console.log(release))
 		.map(release => Object.assign(release, {
-			version: (/\/(\d+\.\d+\.\d+)\//).exec(release.url)[1]
+			version: (/-(\d+\.\d+\.\d+)-/).exec(release.url)[1]
 		}))
 		.flatMap(release => request.contentlength(release.url)
 			.map(contentlength => Object.assign(release, {
