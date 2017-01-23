@@ -1,38 +1,34 @@
 var async = require('async');
 var sugar = require('sugar');
+var Rx = require('../lib/rxnode');
+var request = require('../lib/rxrequest');
 
-function first(a) { return a[0]; }
-module.exports = function(request,callback) {
-	request.dom('http://www.debian.org/distrib/netinst',function(err,$) {
-		if (err) { return callback(err); }
-		var distribution = {
+module.exports = function(_,cb) {
+	return request.dom('http://www.debian.org/distrib/netinst')
+		.flatMap($ => $('.downlist a')
+			.map(a => ({
+				url: a.attr('href'),
+				arch: a.text()
+			}))
+		)
+		.filter(release => (/\.iso$/).test(release.url))
+		.doOnNext(release => console.log(release))
+		.map(release => Object.assign(release, {
+			version: (/\/(\d+\.\d+\.\d+)\//).exec(release.url)[1]
+		}))
+		.flatMap(release => request.contentlength(release.url)
+			.map(contentlength => Object.assign(release, {
+				size: contentlength
+			}))
+		)
+		.toArray()
+		.map(releases => ({
 			id: 'debian',
 			name: 'Debian',
 			tags: ['hybrid'],
-			url: 'http://www.debian.org/'
-		};
-		var releases = $('.downlist a').map(function(a) {
-			return {
-				url: a.attr('href'),
-				arch: a.text()
-			};
-		}).compact().filter(function(release) {
-			return (/\.iso$/).test(release.url);
-		}).map(function(release) {
-			release.version = (/\/(\d+\.\d+\.\d+)\//).exec(release.url)[1];
-			return release;
-		});
-		async.map(releases,function(release,callback) {
-			request.contentlength(release.url,function(err,contentlength) {
-				if (err) { return callback(err); }
-				release.size = contentlength;
-				callback(null,release);
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases;
-			callback(null,distribution);
-		});
-	});
+			url: 'https://debian.org/',
+			releases: releases
+		}))
+		.subscribeCallback(cb)
 };
 
