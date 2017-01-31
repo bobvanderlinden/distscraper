@@ -1,46 +1,36 @@
 var async = require('async');
 var sugar = require('sugar');
+var URL = require('../lib/url');
+var Rx = require('../lib/rxnode');
+var request = require('../lib/rxrequest');
+var filelisting = require('../lib/sites/filelisting');
 
-function first(a) { return a[0]; }
-module.exports = function(request,callback) {
-	var distributionurl = 'http://149.20.37.36/archlinux/iso/';
-	request.dom(distributionurl,function(err,$) {
-		var versions = $('pre a').map(function(a) {
-			return (/^\d+(\.\d+)*/).exec(a.attr('href'));
-		}).compact().map(first);
-		var distribution = {
-			id: 'archlinux',
-			name: 'Arch Linux',
-			tags: ['hybrid'],
-			url: 'http://www.archlinux.org/'
-		};
-
-		async.map(versions,function(version,callback) {
-			var isosurl = distributionurl+version+'/';
-			request.dom(isosurl,function(err,$) {
-				var urls = $('pre a').map(function(a) {
-					return a.attr('href');
-				}).compact().filter(function(filename) {
-					return (/\.iso$/).test(filename);
-				}).map(function(filename) {
-					return isosurl + filename;
-				});
-				async.map(urls,function(url,callback) {
-					request.contentlength(url,function(err,contentLength) {
-						if (err) { return callback(err); }
-						callback(null,{
-							version: version,
-							url: url,
-							size: contentLength
-						});
-					});
-				},callback);
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases.flatten();
-			callback(null,distribution);
-		});
-	});
+module.exports = function (_, cb) {
+  filelisting.getEntries('https://mirror.rackspace.com/archlinux/iso/')
+    .filter(entry => entry.type === 'directory')
+    .filter(entry => (/^\d+(\.\d+)*/).test(entry.name))
+    .flatMap(entry => filelisting.getEntries(entry.url))
+    .filter(entry => entry.type === 'file')
+    .filter(entry => /\.iso$/.test(entry.url))
+    .map(entry => {
+      var match = /archlinux-(\d{4}\.\d{2}\.\d{2})-(\w+).iso$/g.exec(entry.url);
+      return {
+        url: entry.url,
+        arch: entry[2],
+        version: match[1]
+      };
+    })
+    .flatMap(release => request.contentlength(release.url)
+      .map(contentLength => Object.merge(release, { size: contentLength }))
+    )
+    .toArray()
+    .map(releases => ({
+      id: 'archlinux',
+      name: 'Arch Linux',
+      tags: ['hybrid'],
+      url: 'https://www,archlinux.org/',
+      releases: releases
+    }))
+    .subscribeCallback(cb);
 };
 
