@@ -219,3 +219,7 @@ convert -background none $TMP/siduction.png -trim ${RESIZE[@]} $DST/siduction.pn
 # boot-repair-disk
 retrieve http://a.fsdn.com/allura/p/boot-repair-cd/icon $TMP/bootrepairdisk.png
 convert -background none $TMP/bootrepairdisk.png -trim ${RESIZE[@]} $DST/bootrepairdisk.png
+
+# Void Linux
+retrieve https://upload.wikimedia.org/wikipedia/commons/0/02/Void_Linux_logo.svg $TMP/voidlinux.svg
+convert -background none $TMP/voidlinux.svg -trim ${RESIZE[@]} $DST/voidlinux.png
