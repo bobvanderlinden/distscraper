@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var repl = require('repl');
 var fs = require('fs');
 var async = require('async');

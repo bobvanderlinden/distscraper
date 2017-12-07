@@ -2,6 +2,9 @@
   "name": "distscraper",
   "version": "0.0.1",
   "description": "",
+  "bin": {
+    "distscraper": "index.js"
+  },
   "main": "index.js",
   "repository": "",
   "author": "Bob van der Linden",
