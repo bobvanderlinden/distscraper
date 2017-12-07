@@ -2,33 +2,44 @@ var async = require('async');
 var sugar = require('sugar');
 var URL = require('url');
 
-module.exports = function(request,cb) {
-	var url = 'http://www.slax.org/en/download.php';
-	request.dom(url,function(err,$,response) {
-		if (err) { return cb(err); }
-		var urls = $('a').toArray()
-			.map(function(a) { return URL.resolve(response.url,$(a).attr('href')); })
-			.filter(function(url) { return (/\.iso$/).test(url); });
-		async.map(urls,function(url,cb) {
-			var match = /\-(\d+(\.\d+)*)\-(\w+)/.exec(url);
-			request.contentlength(url,function(err,size) {
-				if (err) { return cb(err); }
-				cb(null,{
-					url: url,
-					version: match[1],
-					arch: match[3],
-					size: size
-				});
-			});
-		},function(err,releases) {
-			if (err) { return cb(err); }
-			cb(null,{
-				id: 'slax',
-				name: 'Slax',
-				tags: ['nonhybrid'],
-				url: 'http://www.slax.org/',
-				releases: releases
-			});
-		});
-	});
+
+var async = require('async');
+var sugar = require('sugar');
+var URL = require('../lib/url');
+var Rx = require('../lib/rxnode');
+var request = require('../lib/rxrequest');
+var filelisting = require('../lib/sites/filelisting');
+
+module.exports = function (_, cb) {
+  filelisting.getEntries('http://ftp.sh.cvut.cz/slax/')
+    .filter(entry => entry.type === 'directory')
+    .filter(entry => (/^Slax-\d+\.x$/i).test(entry.name))
+    .flatMap(entry => filelisting.getEntries(entry.url))
+    .filter(entry => entry.type === 'file')
+    .filter(entry => /\.iso$/.test(entry.url))
+    .map(entry => {
+			var archMatch = /-(32bit|64bit|i386|i686|x86_64)[-\.]/g.exec(entry.url);
+			var versionMatch = /-(\d+(?:\.\d+)*)[-\.]/g.exec(entry.url);
+			if (!archMatch || !versionMatch) {
+				return null;
+			}
+      return {
+        url: entry.url,
+        arch: archMatch[1],
+        version: versionMatch[1]
+      };
+		})
+		.filter(entry => entry)
+    .flatMap(release => request.contentlength(release.url)
+      .map(contentLength => Object.merge(release, { size: contentLength }))
+    )
+    .toArray()
+    .map(releases => ({
+      id: 'slax',
+      name: 'Slax',
+      tags: ['hybrid'],
+      url: 'https://www.slax.org/',
+      releases: releases
+    }))
+    .subscribeCallback(cb);
 };
