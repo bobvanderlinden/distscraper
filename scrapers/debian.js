@@ -12,7 +12,6 @@ module.exports = function(_,cb) {
 			}))
 		)
 		.filter(release => (/\.iso$/).test(release.url))
-		.doOnNext(release => console.log(release))
 		.map(release => Object.assign(release, {
 			version: (/-(\d+\.\d+\.\d+)-/).exec(release.url)[1]
 		}))
