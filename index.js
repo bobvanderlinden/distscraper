@@ -242,7 +242,7 @@ Rx.Observable.from(scrapers)
 		console.log('Resolving', distribution.id,'...');
 	})
 	.concatMap(distribution => resolveDistributionReleases(distribution)
-		.catch(err => Observable.just(Object.merge(distribution, {
+		.catch(err => Rx.Observable.just(Object.merge(distribution, {
 			error: err,
 			releases: []
 		})))
