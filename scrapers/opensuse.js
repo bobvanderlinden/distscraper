@@ -15,6 +15,7 @@ module.exports = function (_, cb) {
     .flatMap(entry => filelisting.getEntries(entry.url))
     .filter(entry => entry.type === 'file')
     .filter(entry => /\.iso$/.test(entry.name))
+    .distinct(entry => entry.url)
     .map(entry => {
       const match = /^openSUSE(-Leap)?-(\d+(?:\.\d+)*)-(\w+)-(\w+).iso$/.exec(entry.name)
       if (!match) {
