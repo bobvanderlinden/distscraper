@@ -28,7 +28,7 @@ module.exports = function (_, cb) {
       id: 'archlinux',
       name: 'Arch Linux',
       tags: ['hybrid'],
-      url: 'https://www,archlinux.org/',
+      url: 'https://www.archlinux.org/',
       releases: releases
     }))
     .subscribeCallback(cb);
