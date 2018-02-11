@@ -1,51 +1,35 @@
-var async = require('async');
-var sugar = require('sugar');
-var URL = require('url');
+var Rx =require('../lib/rxnode');
+var request =require('../lib/rxrequest');
+const sourceforge = require('../lib/sites/sourceforge');
 
-function first(a) { return a[0]; }
-module.exports = function(request,callback) {
-	var distribution = {
-		id: 'uberstudent',
-		name: 'UberStudent',
-		tags: ['hybrid'],
-		url: 'http://uberstudent.com/'
-	};
-	var url = 'http://sourceforge.net/projects/uberstudent/files/Releases/';
-	request.dom(url,function(err,$) {
-		if (err) { return callback(err); }
-		var versions = $('th[headers=files_name_h] a.name').map(function(a) {
-			a = $(a);
-			return { url: URL.resolve(url,a.attr('href')), name: a.text().replace(/\s+/g,'') };
-		});
-		async.map(versions,function(version,callback) {
-			var url = version.url;
-			request.dom(url,function(err,$) {
-				if (err) { return callback(err); }
-				var files = $('th[headers=files_name_h] a.name').map(function(a) {
-					a = $(a);
-					var fileUrl = URL.resolve(url,a.attr('href'))
-						.replace(/^https/,'http')
-						.replace(/\/download$/,'');
-					return { url: fileUrl };
-				}).filter(function(file) {
-					return /\.iso$/.test(file.url);
-				}).map(function(file) {
-					file.arch = /(i386|i486|i686|amd64|32bit|64bit)/.exec(file.url)[0];
-					file.version = /[-\.](\d+(\.\d+)*)[-\.]/.exec(file.url)[1];
-					return file;
-				});
-				async.map(files,function(file,callback) {
-					request.contentlength(file.url,function(err,contentLength) {
-						if (err) { return callback(err); }
-						file.size = contentLength;
-						callback(null,file);
-					});
-				},callback);
-			});
-		},function(err,files) {
-			if (err) { return callback(err); }
-			distribution.releases = files.flatten();
-			callback(null,distribution);
-		});
-	});
+module.exports = function(_,callback) {
+  var project = sourceforge.project('uberstudent');
+	project.files('Releases')
+		.filter(entry => entry.type === 'directory')
+		.flatMap(entry => project.files(entry.path))
+    .filter(entry => entry.type === 'file')
+		.map(entry => {
+			const match = /^uberstudent-(\d+(?:\.\d+)+(?:-\d+)?)-\w+-(x86_64|i386|i686|amd64).iso$/.exec(entry.name)
+			if (!match) { return; }
+			return {
+				url: entry.url,
+				arch: match[2],
+				version: match[1],
+			};
+    })
+    .filter(release => release)
+    .flatMap(release => request.contentlength(release.url)
+      .map(contentLength => Object.merge(release, {
+        size: contentLength
+      }))
+    )
+    .toArray()
+    .map(releases => ({
+      id: 'uberstudent',
+      name: 'UberStudent',
+      tags: ['hybrid'],
+      url: 'http://uberstudent.org/',
+      releases: releases
+    }))
+    .subscribeCallback(callback);
 };
