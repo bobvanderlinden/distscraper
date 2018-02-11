@@ -3,48 +3,34 @@ var sugar = require('sugar');
 var URL = require('../lib/url');
 var Rx =require('../lib/rxnode');
 var request =require('../lib/rxrequest');
+const sourceforge = require('../lib/sites/sourceforge');
 
-module.exports = function(_,cb) {
-    request.dom('https://antergos.com/try-it')
-        .flatMap(function($) {
-            return $('a')
-                .map(function(a) { return $(a).attr('href'); });
-        })
-        .filter(function(url) {
-            return /\.iso\.sig$/.test(url);
-        })
-        .distinct()
-        .map(function(url) {
-            return /^https?:\/\/.*\/antergos(-\w+)?-(\d{4}.\d{2}.\d{2})-(x86_64|i686).iso/.exec(url)
-        })
-        .filter(function(match) {
-            return match;
-        })
-        .map(function(match) {
-            return {
-                url: match[0],
-                version: match[1],
-                arch: match[2]
-            };
-        })
-        .flatMap(function(release) {
-            return request.contentlength(release.url)
-                .filter(function(contentlength) { return contentlength; })
-                .map(function(contentlength) {
-                    return Object.merge(release, {
-                        size: contentlength
-                    });
-                });
-        })
-        .toArray()
-        .map(function(releases) {
-            return {
-                id: 'antergos',
-                name: 'Antergos',
-                tags: ['hybrid'],
-                url: 'http://www.antergos.com/',
-                releases: releases
-            };
-        })
-        .subscribeCallback(cb);
+module.exports = function(_,callback) {
+  var project = sourceforge.project('antergos');
+  project.files('mirror/iso/release')
+    .filter(entry => entry.type === 'file')
+		.map(entry => {
+			const match = /^antergos-(\d+(?:\.\d+)+)-(x86_64|i386).iso$/.exec(entry.name)
+			if (!match) { return; }
+			return {
+				url: entry.url,
+				arch: match[2],
+				version: match[1],
+			};
+    })
+    .filter(release => release)
+    .flatMap(release => request.contentlength(release.url)
+      .map(contentLength => Object.merge(release, {
+        size: contentLength
+      }))
+    )
+    .toArray()
+    .map(releases => ({
+      id: 'antergos',
+      name: 'Antergos',
+      tags: ['hybrid'],
+      url: 'https://antergos.com/',
+      releases: releases
+    }))
+    .subscribeCallback(callback);
 };
