@@ -1,41 +1,38 @@
-var async = require('async');
-var sugar = require('sugar');
-var url = require('url');
+var Rx = require('../lib/rxnode');
+var request = require('../lib/rxrequest');
+var filelisting = require('../lib/sites/filelisting');
 
-function first(a) { return a[1]; }
-module.exports = function(request,callback) {
-	var distributionurl = 'http://cdimage.ubuntu.com/xubuntu/releases/';
-	request.dom(distributionurl,function(err,$) {
-		if (err) { return callback(err); }
-		var versions = $('a').map(function(a) { return (/^(\d+(\.\d+)+)\/$/).exec(a.attr('href')); }).compact().map(first);
-		var distribution = {
+module.exports = function(_,cb) {
+	filelisting.getEntries('http://cdimage.ubuntu.com/xubuntu/releases/')
+		.filter(entry => entry.type === 'directory')
+		.filter(entry => /\d+(?:\.\d+)+/.test(entry.name))
+		.flatMap(entry => filelisting.getEntries(entry.url))
+		.filter(entry => entry.name === 'release' && entry.type === 'directory')
+		.flatMap(entry => filelisting.getEntries(entry.url))
+		.filter(entry => entry.type === 'file')
+		.distinct(entry => entry.url)
+		.map(entry => {
+			const match = /^xubuntu-(\d+(?:\.\d+)+)-(\w+)-(amd64|i386).iso$/.exec(entry.name)
+			if (!match) { return; }
+			return {
+				url: entry.url,
+				arch: match[3],
+				version: match[1],
+			};
+		})
+		.filter(release => release)
+    .flatMap(release => request.contentlength(release.url)
+			.map(contentLength => Object.merge(release, {
+				size: contentLength
+			}))
+		)
+		.toArray()
+		.map(releases => ({
 			id: 'xubuntu',
 			name: 'Xubuntu',
 			tags: ['hybrid'],
-			url: 'http://www.xubuntu.com/'
-		};
-		async.map(versions,function(version,callback) {
-			var versionurl = url.resolve(distributionurl,version+'/release/');
-			request.dom(versionurl,function(err,$) {
-				var releases = $('pre a').map(function(a) {
-					return a.attr('href');
-				}).compact().filter(function(filename) {
-					return (/\.iso$/).test(filename);
-				}).map(function(filename) {
-					return {version: version,url:versionurl+filename};
-				});
-				async.map(releases,function(release,callback) {
-					request.contentlength(release.url,function(err,contentlength) {
-						if (err) { return callback(err); }
-						release.size = contentlength;
-						callback(null,release);
-					});
-				},callback);
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases.flatten();
-			callback(null,distribution);
-		});
-	});
+			url: 'https://xubuntu.org/',
+			releases: releases
+		}))
+		.subscribeCallback(cb);
 };
