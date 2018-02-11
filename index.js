@@ -242,7 +242,8 @@ Rx.Observable.from(scrapers)
 		console.log('Resolving', distribution.id,'...');
 	})
 	.concatMap(distribution => resolveDistributionReleases(distribution)
-		.do(distribution => {
+		.doOnNext(distribution => {
+			if (distribution.error) { return; }
 			const errors = validation.validateDistribution(distribution)
 			if (errors && errors.length > 0) {
 				throw errors
