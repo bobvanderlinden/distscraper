@@ -22,7 +22,7 @@ function validateDistribution(distro) {
             if (!release.size) { pushError('Release "'+release.url+'" does not have a size'); }
             // Version is optional.
             //if (!release.version) { pushError('Release "'+release.url+'" does not have an version'); }
-            if (!/^http:\/\//.test(release.url)) { pushError('Release "'+release.url+'" is not an url'); }
+            if (!/^https?:\/\//.test(release.url)) { pushError('Release "'+release.url+'" is not an url'); }
             if (/\s+/.test(release.url)) { pushError('Release "'+release.url+'" has whitespace in its url'); }
             if (distro.releases.filter(function(o) { return o && o.url === release.url; }).length > 1) { pushError('Duplicate url "'+release.url+'".'); }
         });
