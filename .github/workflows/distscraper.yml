@@ -1,6 +1,6 @@
 name: Distscraper
 
-on: []
+on: [push]
 
 jobs:
   build:
