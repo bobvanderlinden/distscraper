@@ -31,7 +31,7 @@ jobs:
       run: |
         mkdir -p out
         cd out
-        node index.js --merge ../all.json --directory ../scrapers
+        node ../index.js --merge ../all.json --directory ../scrapers
         cd -
     - run: aws s3 sync out/ s3://drivedroid-repositories/
       env:
