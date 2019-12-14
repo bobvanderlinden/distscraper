@@ -22,4 +22,4 @@ jobs:
       env:
         CI: true
     - name: Run
-      run: npm start
+      run: node index.js
