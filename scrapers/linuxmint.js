@@ -1,57 +1,37 @@
-var async = require('async');
-var sugar = require('sugar');
+var Rx = require('../lib/rxnode');
+var request = require('../lib/rxrequest');
+var filelisting = require('../lib/sites/filelisting');
 
-function first(a) { return a[0]; }
-module.exports = function(request,callback) {
-	var distributionurl = 'https://ftp.heanet.ie/mirrors/linuxmint.com/stable/';
-	request.dom(distributionurl,function(err,$) {
-		var versions = $('pre a').map(function(a) {
-			return (/^\d+(\.\d+)*/).exec(a.attr('href'));
-		}).compact().map(first);
-		var distribution = {
+module.exports = function(_,cb) {
+	filelisting.getEntries('https://linuxmint.freemirror.org/linuxmint/iso/stable/')
+		.filter(entry => entry.type === 'directory')
+		.filter(entry => /\d+(?:\.\d+)+/.test(entry.name))
+		.flatMap(entry => filelisting.getEntries(entry.url))
+		.filter(entry => entry.type === 'file')
+		.filter(entry => /\.iso$/.test(entry.name))
+		.map(entry => {
+			const match = /^linuxmint-(?<version>\d+(?:\.\d+)+)-(.+)-(?<arch>amd64|i386|32bit|64bit).iso$/.exec(entry.name)
+			if (!match) { return; }
+			const groups = match.groups
+			return {
+				url: entry.url,
+				arch: groups.arch,
+				version: groups.version,
+			};
+		})
+		.filter(release => release)
+    .flatMap(release => request.contentlength(release.url)
+			.map(contentLength => Object.merge(release, {
+				size: contentLength
+			}))
+		)
+		.toArray()
+		.map(releases => ({
 			id: 'linuxmint',
 			name: 'Linux Mint',
 			tags: ['hybrid'],
-			url: 'http://www.linuxmint.com/'
-		};
-
-		async.map(versions,function(version,callback) {
-			var isosurl = distributionurl+version+'/';
-			request.dom(isosurl,function(err,$) {
-				if (err) { return callback(err); }
-				var urls = $('pre a').map(function(a) {
-					return a.attr('href');
-				}).compact().filter(function(filename) {
-					return (/\.iso$/).test(filename);
-				}).map(function(filename) {
-					return isosurl + filename;
-				});
-				async.map(urls,function(url,callback) {
-					request.contentlength(url,function(err,contentLength) {
-						if (err) { return callback(err); }
-						if (!contentLength) { return callback(null,null); }
-						var release = {
-							version: version,
-							url: url.replace(/^https:/, 'http:'),
-							size: contentLength
-						};
-						var archMatch = /[-\.](32bit|64bit)[-\.]/.exec(release.url);
-						if (archMatch) { release.arch = archMatch[1]; }
-
-						var minorVersionMatch = /[-\.]v(\d+)[-\.]/.exec(release.url);
-						if (minorVersionMatch) {
-							release.version += '.' + minorVersionMatch[1];
-						}
-
-						callback(null,release);
-					});
-				},callback);
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases.flatten().compact();
-			callback(null,distribution);
-		});
-	});
-};
-
+			url: 'https://www.linuxmint.com/',
+			releases: releases
+		}))
+		.subscribeCallback(cb);
+}
