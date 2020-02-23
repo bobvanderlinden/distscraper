@@ -228,10 +228,7 @@ Rx.Observable.from(scrapers)
 			releases: Rx.Observable.empty()
 		}))
 	)
-	.merge(1)
-	.doOnNext(distribution => {
-		console.log('Resolving', distribution.id,'...');
-	})
+	.merge(4)
 	.concatMap(distribution => resolveDistributionReleases(distribution)
 		.doOnNext(distribution => {
 			if (distribution.error) { return; }
