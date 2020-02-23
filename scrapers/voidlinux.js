@@ -7,15 +7,14 @@ module.exports = {
   name: 'Void Linux',
   tags: ['hybrid'],
   url: 'https://voidlinux.eu/',
-  releases: filelisting.getEntries('https://a-hel-fi.m.voidlinux.eu/live/current/')
+  releases: filelisting.getEntries('https://alpha.de.repo.voidlinux.org/live/current/')
     .filter(entry => entry.type === 'file')
     .map(entry => {
-      const match = /^void-live-(i686|x86_64)-(\d{8})(?:-\w+)?\.iso$/g.exec(entry.name)
-      if (!match) return null
-      return {
+      const match = /^void-live-(?<arch>i686|x86_64)-(?:musl-)?(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})(?:-(?<flavor>\w+))?\.iso$/g.exec(entry.name)
+      return match && {
         url: entry.url,
-        arch: match[1],
-        version: match[2]
+        arch: match.groups.arch,
+        version: `${match.groups.year}.${match.groups.month}.${match.groups.day}`
       }
     })
     .filter(entry => entry)
