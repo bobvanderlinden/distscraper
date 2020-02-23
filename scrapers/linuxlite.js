@@ -2,9 +2,14 @@ var Rx = require('../lib/rxnode');
 var request = require('../lib/rxrequest');
 const sourceforge = require('../lib/sites/sourceforge');
 
-module.exports = function(_,callback) {
-  var project = sourceforge.project('linuxlite');
-  project.files()
+const project = sourceforge.project('linuxlite');
+
+module.exports = {
+  id: 'linuxlite',
+  name: 'Linux Lite',
+  tags: ['hybrid'],
+  url: 'https://linuxliteos.com/',
+  releases: project.files()
     .filter(entry => entry.type === 'directory')
     .flatMap(entry => project.files(entry.path))
     .filter(entry => entry.type === 'file')
@@ -22,13 +27,4 @@ module.exports = function(_,callback) {
         size: contentLength
       }))
     )
-    .toArray()
-    .map(releases => ({
-      id: 'linuxlite',
-      name: 'Linux Lite',
-      tags: ['hybrid'],
-      url: 'https://linuxliteos.com/',
-      releases: releases
-    }))
-    .subscribeCallback(callback);
-};
+}

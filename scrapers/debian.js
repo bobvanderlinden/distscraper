@@ -3,8 +3,12 @@ var sugar = require('sugar');
 var Rx = require('../lib/rxnode');
 var request = require('../lib/rxrequest');
 
-module.exports = function(_,cb) {
-	return request.dom('http://www.debian.org/distrib/netinst')
+module.exports = {
+	id: 'debian',
+	name: 'Debian',
+	tags: ['hybrid'],
+	url: 'https://debian.org/',
+	releases: request.dom('http://www.debian.org/distrib/netinst')
 		.flatMap($ => $('.downlist a')
 			.map(a => ({
 				url: a.attr('href'),
@@ -20,14 +24,5 @@ module.exports = function(_,cb) {
 				size: contentlength
 			}))
 		)
-		.toArray()
-		.map(releases => ({
-			id: 'debian',
-			name: 'Debian',
-			tags: ['hybrid'],
-			url: 'https://debian.org/',
-			releases: releases
-		}))
-		.subscribeCallback(cb)
 };
 

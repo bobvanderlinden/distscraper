@@ -2,8 +2,12 @@ var sugar = require('sugar');
 var request = require('../lib/rxrequest');
 var filelisting = require('../lib/sites/filelisting');
 
-module.exports = function (_, cb) {
-  filelisting.getEntries('https://a-hel-fi.m.voidlinux.eu/live/current/')
+module.exports = {
+  id: 'voidlinux',
+  name: 'Void Linux',
+  tags: ['hybrid'],
+  url: 'https://voidlinux.eu/',
+  releases: filelisting.getEntries('https://a-hel-fi.m.voidlinux.eu/live/current/')
     .filter(entry => entry.type === 'file')
     .map(entry => {
       const match = /^void-live-(i686|x86_64)-(\d{8})(?:-\w+)?\.iso$/g.exec(entry.name)
@@ -18,14 +22,4 @@ module.exports = function (_, cb) {
     .flatMap(release => request.contentlength(release.url)
       .map(contentLength => Object.merge(release, { size: contentLength }))
     )
-    .toArray()
-    .map(releases => ({
-      id: 'voidlinux',
-      name: 'Void Linux',
-      tags: ['hybrid'],
-      url: 'https://voidlinux.eu/',
-      releases: releases
-    }))
-    .subscribeCallback(cb);
 };
-

@@ -5,9 +5,14 @@ var Rx =require('../lib/rxnode');
 var request =require('../lib/rxrequest');
 const sourceforge = require('../lib/sites/sourceforge');
 
-module.exports = function(_,callback) {
-  var project = sourceforge.project('antergos');
-  project.files('mirror/iso/release')
+const project = sourceforge.project('antergos');
+
+module.exports = {
+  id: 'antergos',
+  name: 'Antergos',
+  tags: ['hybrid'],
+  url: 'https://antergos.com/',
+  releases: project.files('mirror/iso/release')
     .filter(entry => entry.type === 'file')
 		.map(entry => {
 			const match = /^antergos-(\d+(?:\.\d+)+)-(x86_64|i386).iso$/.exec(entry.name)
@@ -24,13 +29,4 @@ module.exports = function(_,callback) {
         size: contentLength
       }))
     )
-    .toArray()
-    .map(releases => ({
-      id: 'antergos',
-      name: 'Antergos',
-      tags: ['hybrid'],
-      url: 'https://antergos.com/',
-      releases: releases
-    }))
-    .subscribeCallback(callback);
-};
+}

@@ -5,8 +5,14 @@ var Rx = require('../lib/rxnode');
 var request = require('../lib/rxrequest');
 var filelisting = require('../lib/sites/filelisting');
 
-module.exports = function (_, cb) {
-  filelisting.getEntries('http://dl.fedoraproject.org/pub/fedora/linux/releases/')
+
+
+module.exports = {
+  id: 'fedora',
+  name: 'Fedora',
+  tags: ['hybrid'],
+  url: 'https://getfedora.org/',
+  releases: filelisting.getEntries('http://dl.fedoraproject.org/pub/fedora/linux/releases/')
     .filter(entry => /^\d+$/.test(entry.name))
     .flatMap(entry => filelisting.getEntries(entry.url))
     .filter(entry => entry.type === 'directory' && /^(Everything|Spins|Live|Fedora)$/.test(entry.name))
@@ -34,14 +40,4 @@ module.exports = function (_, cb) {
     .flatMap(release => request.contentlength(release.url)
       .map(contentLength => Object.merge(release, { size: contentLength }))
     )
-    .toArray()
-    .map(releases => ({
-      id: 'fedora',
-      name: 'Fedora',
-      tags: ['hybrid'],
-      url: 'https://getfedora.org/',
-      releases: releases
-    }))
-    .subscribeCallback(cb);
 };
-

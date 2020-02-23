@@ -5,9 +5,14 @@ var Rx =require('../lib/rxnode');
 var request =require('../lib/rxrequest');
 const sourceforge = require('../lib/sites/sourceforge');
 
-module.exports = function(_,callback) {
-	var project = sourceforge.project('bbqlinux');
-	project.files('x86_64')
+const project = sourceforge.project('bbqlinux');
+
+module.exports = {
+  id: 'bbqlinux',
+  name: 'BBQLinux',
+  tags: ['hybrid'],
+  url: 'http://bbqlinux.org/',
+  releases: project.files('x86_64')
 		.filter(entry => entry.type === 'file')
 		.map(entry => {
 			const match = /^bbqlinux-(\d+(?:\.\d+)*)-(amd64|x86_64|i386|i686)-(?:\w+).iso$/.exec(entry.name)
@@ -24,13 +29,4 @@ module.exports = function(_,callback) {
         size: contentLength
       }))
     )
-    .toArray()
-    .map(releases => ({
-			id: 'bbqlinux',
-			name: 'BBQLinux',
-			tags: ['hybrid'],
-			url: 'http://bbqlinux.org/',
-      releases: releases
-    }))
-    .subscribeCallback(callback);
-};
+}

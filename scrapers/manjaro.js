@@ -2,9 +2,13 @@ var Rx = require("../lib/rxnode");
 var request = require("../lib/rxrequest");
 const sourceforge = require("../lib/sites/sourceforge");
 
-module.exports = function(_, callback) {
-  var project = sourceforge.project("manjarolinux");
-  project.files("release")
+var project = sourceforge.project("manjarolinux");
+module.exports = {
+  id: "manjaro",
+  name: "Manjaro",
+  tags: ["hybrid"],
+  url: "https://manjaro.org/",
+  releases: project.files("release")
     .filter(entry => entry.type === "directory")
     .flatMap(entry => project.files(entry.path))
     .filter(entry => entry.type === "directory")
@@ -31,13 +35,4 @@ module.exports = function(_, callback) {
         })
       )
     )
-    .toArray()
-    .map(releases => ({
-      id: "manjaro",
-      name: "Manjaro",
-      tags: ["hybrid"],
-      url: "https://manjaro.org/",
-      releases: releases
-    }))
-    .subscribeCallback(callback);
 };

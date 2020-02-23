@@ -10,13 +10,12 @@ function assert(condition, message) {
   }
 }
 
-module.exports = function(_,cb) {
-  request.json('http://urix.us/main.json')
-    .map(function(distributions) {
-      assert(distributions.length === 1, 'Urix OS had an invalid number of distributions');
-      var distribution = distributions[0];
-      assert(distribution.id === 'urixos', 'Urix OS had an invalid number of distributions');
-      return distribution;
-    })
-    .subscribeCallback(cb);
+module.exports ={
+  name: 'URIX OS',
+  tags: ['hybrid'],
+  url: 'http://urix.us/',
+  releases: request.json('http://urix.us/main.json')
+    .flatMap(distributions => distributions)
+    .filter(distribution => distribution.id === 'urixos')
+    .flatMap(distribution => distribution.releases)
 };

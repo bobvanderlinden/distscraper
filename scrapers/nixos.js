@@ -5,8 +5,12 @@ var Rx =require('../lib/rxnode');
 var request =require('../lib/rxrequest');
 var filelisting = require('../lib/sites/filelisting');
 
-module.exports = function(_,cb) {
-  filelisting.getEntries('https://nixos.org/channels/')
+module.exports = {
+  id: 'nixos',
+  name: 'NixOS',
+  tags: ['hybrid'],
+  url: 'http://nixos.org/',
+  releases: filelisting.getEntries('https://nixos.org/channels/')
     .filter(entry => /^nixos-\d+\.\d+(-small)?/.test(entry.name))
     .flatMap(entry => request.dom(entry.url))
     .flatMap($ =>
@@ -31,13 +35,4 @@ module.exports = function(_,cb) {
     .flatMap(release => request.contentlength(release.url)
       .map(contentLength => Object.merge(release, { size: contentLength }))
     )
-    .toArray()
-    .map(releases => ({
-      id: 'nixos',
-      name: 'NixOS',
-      tags: ['hybrid'],
-      url: 'http://nixos.org/',
-      releases: releases
-    }))
-    .subscribeCallback(cb);
 };

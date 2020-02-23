@@ -2,8 +2,12 @@ var Rx = require('../lib/rxnode');
 var request = require('../lib/rxrequest');
 var filelisting = require('../lib/sites/filelisting');
 
-module.exports = function(_,cb) {
-	filelisting.getEntries('http://cdimage.ubuntu.com/xubuntu/releases/')
+module.exports = {
+	id: 'xubuntu',
+	name: 'Xubuntu',
+	tags: ['hybrid'],
+	url: 'https://xubuntu.org/',
+	releases: filelisting.getEntries('http://cdimage.ubuntu.com/xubuntu/releases/')
 		.filter(entry => entry.type === 'directory')
 		.filter(entry => /\d+(?:\.\d+)+/.test(entry.name))
 		.flatMap(entry => filelisting.getEntries(entry.url))
@@ -12,27 +16,17 @@ module.exports = function(_,cb) {
 		.filter(entry => entry.type === 'file')
 		.distinct(entry => entry.url)
 		.map(entry => {
-			const match = /^xubuntu-(\d+(?:\.\d+)+)-(\w+)-(amd64|i386).iso$/.exec(entry.name)
-			if (!match) { return; }
-			return {
+			const match = /^xubuntu-(?<version>\d+(?:\.\d+)+)-(?<flavor>\w+)-(?<arch>amd64|i386).iso$/.exec(entry.name)
+			return match && {
 				url: entry.url,
-				arch: match[3],
-				version: match[1],
+				arch: match.groups.arch,
+				version: match.groups.version,
 			};
 		})
 		.filter(release => release)
-    .flatMap(release => request.contentlength(release.url)
+		.flatMap(release => request.contentlength(release.url)
 			.map(contentLength => Object.merge(release, {
 				size: contentLength
 			}))
 		)
-		.toArray()
-		.map(releases => ({
-			id: 'xubuntu',
-			name: 'Xubuntu',
-			tags: ['hybrid'],
-			url: 'https://xubuntu.org/',
-			releases: releases
-		}))
-		.subscribeCallback(cb);
 };

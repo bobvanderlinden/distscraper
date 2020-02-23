@@ -2,8 +2,12 @@ var Rx = require('../lib/rxnode');
 var request = require('../lib/rxrequest');
 var filelisting = require('../lib/sites/filelisting');
 
-module.exports = function(_,cb) {
-	filelisting.getEntries('http://cdimage.ubuntu.com/kubuntu/releases/')
+module.exports = {
+	id: 'kubuntu',
+	name: 'Kubuntu',
+	tags: ['hybrid'],
+	url: 'https://kubuntu.org/',
+	releases: 	filelisting.getEntries('http://cdimage.ubuntu.com/kubuntu/releases/')
 		.filter(entry => entry.type === 'directory')
 		.filter(entry => /\d+(?:\.\d+)+/.test(entry.name))
 		.flatMap(entry => filelisting.getEntries(entry.url))
@@ -21,18 +25,9 @@ module.exports = function(_,cb) {
 			};
 		})
 		.filter(release => release)
-    .flatMap(release => request.contentlength(release.url)
+		.flatMap(release => request.contentlength(release.url)
 			.map(contentLength => Object.merge(release, {
 				size: contentLength
 			}))
 		)
-		.toArray()
-		.map(releases => ({
-			id: 'kubuntu',
-			name: 'Kubuntu',
-			tags: ['hybrid'],
-			url: 'https://kubuntu.org/',
-			releases: releases
-		}))
-		.subscribeCallback(cb);
 };

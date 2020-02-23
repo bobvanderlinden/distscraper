@@ -5,9 +5,14 @@ var Rx = require('../lib/rxnode');
 var request = require('../lib/rxrequest');
 var sourceforge = require('../lib/sites/sourceforge');
 
-module.exports = function (_, cb) {
-  var sourceforgeProject = sourceforge.project('zorin-os');
-  sourceforgeProject.files()
+var sourceforgeProject = sourceforge.project('zorin-os');
+
+module.exports = {
+  id: 'zorinos',
+  name: 'Zorin OS',
+  tags: ['hybrid'],
+  url: 'http://zorinos.com/',
+  releases: sourceforgeProject.files()
     .filter(entry => entry.type === 'directory')
     .flatMap(entry => sourceforgeProject.files(entry.path))
     .filter(entry => entry.type === 'file')
@@ -27,13 +32,4 @@ module.exports = function (_, cb) {
         size: contentLength
       }))
     )
-    .toArray()
-    .map(releases => ({
-      id: 'zorinos',
-      name: 'Zorin OS',
-      tags: ['hybrid'],
-      url: 'http://zorinos.com/',
-      releases: releases
-    }))
-    .subscribeCallback(cb);
 };

@@ -5,8 +5,12 @@ var Rx = require('../lib/rxnode');
 var request = require('../lib/rxrequest');
 var filelisting = require('../lib/sites/filelisting');
 
-module.exports = function (_, cb) {
-  filelisting.getEntries('https://mirror.rackspace.com/archlinux/iso/')
+module.exports = {
+  id: 'archlinux',
+  name: 'Arch Linux',
+  tags: ['hybrid'],
+  url: 'https://www.archlinux.org/',
+  releases: filelisting.getEntries('https://mirror.rackspace.com/archlinux/iso/')
     .filter(entry => entry.type === 'directory')
     .filter(entry => (/^\d+(\.\d+)*/).test(entry.name))
     .flatMap(entry => filelisting.getEntries(entry.url))
@@ -23,14 +27,5 @@ module.exports = function (_, cb) {
     .flatMap(release => request.contentlength(release.url)
       .map(contentLength => Object.merge(release, { size: contentLength }))
     )
-    .toArray()
-    .map(releases => ({
-      id: 'archlinux',
-      name: 'Arch Linux',
-      tags: ['hybrid'],
-      url: 'https://www.archlinux.org/',
-      releases: releases
-    }))
-    .subscribeCallback(cb);
 };
 

@@ -2,9 +2,14 @@ var Rx = require('../lib/rxnode');
 var request = require('../lib/rxrequest');
 const sourceforge = require('../lib/sites/sourceforge');
 
-module.exports = function(_,callback) {
-  var project = sourceforge.project('ophcrack');
-  project.files('ophcrack-livecd')
+const project = sourceforge.project('ophcrack');
+
+module.exports = {
+  id: 'ophcrack',
+  name: 'ophcrack',
+  tags: ['hybrid'],
+  url: 'http://ophcrack.sourceforge.net/',
+  releases: project.files('ophcrack-livecd')
     .filter(entry => entry.type === 'directory')
     .flatMap(entry => project.files(entry.path))
     .filter(entry => entry.type === 'file')
@@ -19,13 +24,4 @@ module.exports = function(_,callback) {
         size: contentLength
       }))
     )
-    .toArray()
-    .map(releases => ({
-      id: 'ophcrack',
-      name: 'ophcrack',
-      tags: ['hybrid'],
-      url: 'http://ophcrack.sourceforge.net/',
-      releases: releases
-    }))
-    .subscribeCallback(callback);
-};
+}

@@ -2,9 +2,14 @@ var Rx =require('../lib/rxnode');
 var request =require('../lib/rxrequest');
 const sourceforge = require('../lib/sites/sourceforge');
 
-module.exports = function(_,callback) {
-  var project = sourceforge.project('gparted');
-	project.files('gparted-live-stable')
+const project = sourceforge.project('gparted');
+
+module.exports = {
+  id: 'gparted',
+  name: 'GParted',
+  tags: ['hybrid'],
+  url: 'https://gparted.org/',
+  releases: project.files('gparted-live-stable')
 		.filter(entry => entry.type === 'directory')
 		.flatMap(entry => project.files(entry.path))
     .filter(entry => entry.type === 'file')
@@ -23,13 +28,4 @@ module.exports = function(_,callback) {
         size: contentLength
       }))
     )
-    .toArray()
-    .map(releases => ({
-      id: 'gparted',
-      name: 'GParted',
-      tags: ['hybrid'],
-      url: 'https://gparted.org/',
-      releases: releases
-    }))
-    .subscribeCallback(callback);
-};
+}

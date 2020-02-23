@@ -5,8 +5,12 @@ var Rx = require('../lib/rxnode');
 var request = require('../lib/rxrequest');
 var filelisting = require('../lib/sites/filelisting');
 
-module.exports = function (_, cb) {
-  Rx.Observable.merge(
+module.exports = {
+  id: 'opensuse',
+  name: 'OpenSUSE',
+  tags: ['hybrid'],
+  url: 'https://www.opensuse.org/',
+  releases: Rx.Observable.merge(
     filelisting.getEntries('http://download.opensuse.org/distribution/leap/'),
     filelisting.getEntries('http://download.opensuse.org/distribution/'))
     .filter(entry => /^\d+(\.\d+)*$/.test(entry.name))
@@ -35,14 +39,4 @@ module.exports = function (_, cb) {
     .flatMap(release => request.contentlength(release.url)
       .map(contentLength => Object.merge(release, { size: contentLength }))
     )
-    .toArray()
-    .map(releases => ({
-      id: 'opensuse',
-      name: 'OpenSUSE',
-      tags: ['hybrid'],
-      url: 'https://www.opensuse.org/',
-      releases: releases
-    }))
-    .subscribeCallback(cb);
 };
-
