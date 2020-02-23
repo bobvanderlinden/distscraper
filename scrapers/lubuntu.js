@@ -1,40 +1,27 @@
-var async = require('async');
-var sugar = require('sugar');
-var url = require('url');
+const request = require('../lib/rxrequest')
+const filelisting = require('../lib/sites/filelisting')
 
-function first(a) { return a[1]; }
-module.exports = function(request,callback) {
-	var distributionurl = 'http://cdimage.ubuntu.com/lubuntu/releases/';
-	request.dom(distributionurl,function(err,$) {
-		var versions = $('a').map(function(a) { return (/^(\d+\.\d+.*)\/$/).exec(a.attr('href')); }).compact().map(first);
-		var distribution = {
-			id: 'lubuntu',
-			name: 'Lubuntu',
-			tags: ['hybrid'],
-			url: 'http://www.lubuntu.net/'
-		};
-		async.map(versions,function(version,callback) {
-			var versionurl = url.resolve(distributionurl,version+'/release/').trim();
-			request.dom(versionurl,function(err,$) {
-				var releases = $('a').map(function(a) {
-					return a.attr('href').trim();
-				}).compact().filter(function(filename) {
-					return (/\.iso$/).test(filename);
-				}).unique().map(function(filename) {
-					return {version: version,url:versionurl+filename};
-				});
-				async.map(releases,function(release,callback) {
-					request.contentlength(release.url,function(err,contentlength) {
-						if (err) { return callback(err); }
-						release.size = contentlength;
-						callback(null,release);
-					});
-				},callback);
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases.flatten();
-			callback(null,distribution);
-		});
-	});
+module.exports =  {
+	id: 'lubuntu',
+	name: 'Lubuntu',
+	tags: ['hybrid'],
+	url: 'http://www.lubuntu.net/',
+	releases: filelisting.getEntries('http://cdimage.ubuntu.com/lubuntu/releases/')
+		.filter(entry => entry.type === 'directory')
+		.filter(entry => /^\d+(\.\d+)*$/.test(entry.name))
+		.flatMap(entry => filelisting.getEntries(`${entry.url}release/`))
+		.filter(entry => entry.type === 'file')
+		.distinct(entry => entry.url)
+		.map(entry => {
+			var match = /^lubuntu-(?<version>\d+(\.\d+)*)-(?<flavor>\w+)-(?<arch>\w+).iso$/g.exec(entry.name);
+			return match && {
+				url: entry.url,
+				arch: match.groups.arch,
+				version: match.groups.version
+			};
+		})
+		.filter(release => release)
+		.flatMap(release => request.contentlength(release.url)
+			.map(contentLength => Object.merge(release, { size: contentLength }))
+		)
 };

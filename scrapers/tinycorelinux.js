@@ -1,37 +1,27 @@
-var async = require('async');
-var sugar = require('sugar');
+const request = require('../lib/rxrequest');
+const filelisting = require('../lib/sites/filelisting');
+const URL = require('url');
 
-module.exports = function(request,callback) {
-	var distributionurl = 'http://distro.ibiblio.org/tinycorelinux/4.x/x86/release/';
-	request.dom(distributionurl,function(err,$) {
-		if (err) { return callback(err); }
-		var releases = $('a').map(function(a) {
-			return (/^\w+-(\d+(?:\.\d+)*)\.iso$/).exec(a.attr('href'));
-		}).compact().map(function(match) {
-			return {
-				url: distributionurl+match[0],
-				version: match[1],
-				arch: 'x86'
+module.exports = {
+	id: 'tinycorelinux',
+	name: 'Tiny Core Linux',
+	tags: ['hybrid'],
+	url: 'http://distro.ibiblio.org/tinycorelinux/',
+	releases: request.dom('http://distro.ibiblio.org/tinycorelinux/downloads.html')
+		.flatMap($ => $('a').map(a => a.attr('href') && URL.resolve($.response.url, a.attr('href'))))
+		.filter(url => url && /\/release\/$/.test(url))
+		.flatMap(url => filelisting.getEntries(url))
+		.filter(entry => entry.type === 'file')
+		.map(entry => {
+			var match = /^(?<flavor>\w+)-(?<version>\d+(?:\.\d+)*).iso$/g.exec(entry.name);
+			return match && {
+				url: entry.url,
+				arch: match.groups.arch,
+				version: match.groups.version
 			};
-		});
-		var distribution = {
-			id: 'tinycorelinux',
-			name: 'Tiny Core Linux',
-			tags: ['hybrid'],
-			url: 'http://distro.ibiblio.org/tinycorelinux/'
-		};
-
-		async.map(releases,function(release,callback) {
-			request.contentlength(release.url,function(err,contentLength) {
-				if (err) { return callback(err); }
-				release.size = contentLength;
-				callback(null,release);
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases;
-			callback(null,distribution);
-		});
-	});
+		})
+		.filter(release => release)
+		.flatMap(release => request.contentlength(release.url)
+			.map(contentLength => Object.merge(release, { size: contentLength }))
+		)
 };
-

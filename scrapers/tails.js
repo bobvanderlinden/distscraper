@@ -1,57 +1,26 @@
-var URL = require('url');
-var async = require('async');
-var sugar = require('sugar');
+const request = require('../lib/rxrequest');
+const filelisting = require('../lib/sites/filelisting');
 
-function requestOptions(url) {
-	return {
-		url: url,
-		headers: {
-			host: 'dl.amnesia.boum.org'
-		},
-		rejectUnauthorized: true
-	};
-}
-
-module.exports = function(request,cb) {
-	request.dom(requestOptions('http://83.212.104.246/tails/stable/'),function(err,$,response) {
-		var versionUrls = $('pre a')
-			.map(function(anchor) {
-				var url = $(anchor).attr('href');
-				return /^tails-(\w+)-(\d+(\.\d+)*)/.test(url) && url;
-			})
-			.filter(function(url) { return url; })
-			.map(function(url) { return URL.resolve(response.url,url); });
-		async.map(versionUrls,function(versionUrl,cb) {
-			request.dom(requestOptions(versionUrl),function(err,$,response) {
-				if (err) { return cb(err); }
-				var releases = $('pre a')
-					.map(function(anchor) { return /^tails-(\w+)-(\d+(\.\d+)*)\.iso$/.exec(anchor.attr('href')); })
-					.filter(function(match) { return match !== null; })
-					.map(function(match) {
-						return {
-							url: URL.resolve(response.url,match[0]),
-							version: match[2],
-							arch: match[1]
-						};
-					});
-				async.map(releases,function(release,cb) {
-					request.contentlength(requestOptions(release.url),function(err,contentLength) {
-						if (err) { return cb(err); }
-						release.url = release.url.replace('83.212.104.246','dl.amnesia.boum.org');
-						release.size = contentLength;
-						cb(null,release);
-					});
-				},cb);
-			});
-		},function(err,releases) {
-			if (err) { return cb(err); }
-			cb(null,{
-				id: 'tails',
-				name: 'Tails',
-				tags: ['nonhybrid'],
-				url: 'https://tails.boum.org/',
-				releases: releases.flatten()
-			});
-		});
-	});
+module.exports = {
+	id: 'tails',
+	name: 'Tails',
+	tags: ['nonhybrid'],
+	url: 'https://tails.boum.org/',
+	releases: filelisting.getEntries('https://tails.u-strasbg.fr/stable/')
+		.filter(entry => entry.type === 'directory')
+		.filter(entry => (/^tails-(?<arch>\w+)-(?<version>\d+(\.\d+)*)$/).test(entry.name))
+		.flatMap(entry => filelisting.getEntries(entry.url))
+		.filter(entry => entry.type === 'file')
+		.map(entry => {
+			var match = /^tails-(?<arch>\w+)-(?<version>\d+(\.\d+)*)\.iso$/g.exec(entry.name);
+			return match && {
+				url: entry.url,
+				arch: match.groups.arch,
+				version: match.groups.version
+			};
+		})
+		.filter(release => release)
+		.flatMap(release => request.contentlength(release.url)
+			.map(contentLength => Object.merge(release, { size: contentLength }))
+		)
 };

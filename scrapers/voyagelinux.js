@@ -1,50 +1,24 @@
-var async = require('async');
-var sugar = require('sugar');
-var URL = require('url');
+const request = require('../lib/rxrequest');
+const filelisting = require('../lib/sites/filelisting');
 
-module.exports = function(request,cb) {
-	async.parallel([
-		retrieveReleases('http://alpha.voyage.hk/download/ISO/','x86'),
-		retrieveReleases('http://alpha.voyage.hk/download/ISO/amd64/','amd64')
-	],function(err,results) {
-		cb(err,{
-			id: 'voyagelinux',
-			name: 'Voyage Linux',
-			tags: ['hybrid'],
-			url: 'http://linux.voyage.hk/',
-			releases: results.flatten()
-		});
-	})
-	function retrieveReleases(url,arch) {
-		return function(cb) {
-			request.dom(url,handleResponse);
-			function handleResponse(err,$,response) {
-				var releases = $('pre a').map(function(a) {
-					return {
-						url: URL.resolve(response.url,a.attr('href')),
-						arch: arch
-					};
-				}).compact().filter(function(release) {
-					if ((/\.iso$/).test(release.url)) {
-						var match = (/(\d+(\.\d+)+)/).exec(release.url);
-						if (match) {
-							release.version = match[1];
-						}
-						return true;
-					}
-					return false;
-				});
-				async.map(releases,function(release,cb) {
-					request.contentlength(release.url,function(err,contentlength) {
-						if (err) { return cb(err); }
-						release.size = contentlength;
-						cb(null,release);
-					});
-				},function(err,releases) {
-					cb(err,releases);
-				});
-			}
-		};
-	}
+module.exports = {
+	id: 'voyagelinux',
+	name: 'Voyage Linux',
+	tags: ['hybrid'],
+	url: 'http://linux.voyage.hk/',
+	releases: filelisting.getEntries('http://alpha.voyage.hk/download/ISO/')
+		.concat(filelisting.getEntries('http://alpha.voyage.hk/download/ISO/amd64/'))
+		.filter(entry => entry.type === 'file')
+		.map(entry => {
+			var match = /^voyage-(?<version>\d+(\.\d+)*(?:-\w+)?)(?<arch>_amd64)?\.iso$/g.exec(entry.name);
+			return match && {
+				url: entry.url,
+				arch: match.groups.arch ? 'amd64' : 'x86',
+				version: match.groups.version
+			};
+		})
+		.filter(release => release)
+		.flatMap(release => request.contentlength(release.url)
+			.map(contentLength => Object.merge(release, { size: contentLength }))
+		)
 };
-

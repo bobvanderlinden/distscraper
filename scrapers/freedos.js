@@ -1,44 +1,24 @@
-var async = require('async');
-var sugar = require('sugar');
+const request = require('../lib/rxrequest')
+const filelisting = require('../lib/sites/filelisting')
 
-module.exports = function(request,callback) {
-	var distributionurl = 'http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/';
-	request.dom(distributionurl,function(err,$) {
-		var versions = $('a').map(function(a) {
-			return (/^(\d+(\.\d+)*)\/$/).exec(a.attr('href'));
-		}).compact().map(function(match) { return match[1]; });
-		var distribution = {
-			id: 'freedos',
-			name: 'FreeDOS',
-			tags: ['hybrid'],
-			url: 'http://www.freedos.org/'
-		};
-		async.map(versions,function(version,callback) {
-			var isosurl = distributionurl+version+'/';
-			request.dom(isosurl,function(err,$) {
-				var urls = $('a').map(function(a) {
-					return a.attr('href');
-				}).compact().filter(function(filename) {
-					return (/\.img$/).test(filename);
-				}).map(function(filename) {
-					return isosurl + filename;
-				});
-				async.map(urls,function(url,callback) {
-					request.contentlength(url,function(err,contentLength) {
-						if (err) { return callback(err); }
-						callback(null,{
-							version: version,
-							url: url,
-							size: contentLength
-						});
-					});
-				},callback);
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases.flatten();
-			callback(null,distribution);
-		});
-	});
+module.exports = {
+	id: 'freedos',
+	name: 'FreeDOS',
+	tags: ['hybrid'],
+	url: 'http://www.freedos.org/',
+	releases: filelisting.getEntries('http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/')
+		.filter(entry => entry.type === 'directory')
+		.filter(entry => (/^\d+(\.\d+)*$/).test(entry.name))
+		.flatMap(directoryEntry =>
+			filelisting.getEntries(directoryEntry.url)
+				.filter(entry => entry.type === 'file')
+				.filter(entry => /\.img$/.test(entry.name))
+				.map(entry => ({
+					version: directoryEntry.name,
+					url: entry.url
+				}))
+		)
+		.flatMap(release => request.contentlength(release.url)
+			.map(contentLength => Object.merge(release, { size: contentLength }))
+		)
 };
-

@@ -1,43 +1,26 @@
-var async = require('async');
-var sugar = require('sugar');
+const request = require('../lib/rxrequest');
+const filelisting = require('../lib/sites/filelisting');
 
-function first(a) { return a[1]; }
-module.exports = function(request,callback) {
-	var distributionurl = 'http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/';
-	request.dom(distributionurl,function(err,$) {
-		var versions = $('table a').map(function(a) { return (/^(\d+(\.\d+)+)\/$/).exec(a.attr('href')); }).compact().map(first);
-		var distribution = {
-			id: 'freebsd',
-			name: 'FreeBSD',
-			tags: ['hybrid'],
-			url: 'http://www.freebsd.org/'
-		};
-		async.map(versions,function(version,callback) {
-			var versionurl = distributionurl+version+'/';
-			request.dom(versionurl,function(err,$) {
-				var releases = $('table a').map(function(a) {
-					return a.attr('href');
-				}).compact().filter(function(filename) {
-					return (/\.img$/).test(filename);
-				}).map(function(filename) {
-					return {
-						version: version,
-						url:versionurl+filename,
-						arch: /-([^-]+)-[^-]+$/.exec(filename)[1]
-					};
-				});
-				async.map(releases,function(release,callback) {
-					request.contentlength(release.url,function(err,contentlength) {
-						if (err) { return callback(err); }
-						release.size = contentlength;
-						callback(null,release);
-					});
-				},callback);
-			});
-		},function(err,releases) {
-			if (err) { return callback(err); }
-			distribution.releases = releases.flatten();
-			callback(null,distribution);
-		});
-	});
+module.exports = {
+	id: 'freebsd',
+	name: 'FreeBSD',
+	tags: ['hybrid'],
+	url: 'http://www.freebsd.org/',
+	releases: filelisting.getEntries('http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/')
+		.filter(entry => entry.type === 'directory')
+		.filter(entry => (/^\d+(\.\d+)*/).test(entry.name))
+		.flatMap(entry => filelisting.getEntries(entry.url))
+		.filter(entry => entry.type === 'file')
+		.map(entry => {
+			var match = /^FreeBSD-(?<version>\d+(\.\d+))-RELEASE-(?<arch>\w+)-memstick.img$/g.exec(entry.name);
+			return match && {
+				url: entry.url,
+				arch: match.groups.arch,
+				version: match.groups.version
+			};
+		})
+		.filter(release => release)
+		.flatMap(release => request.contentlength(release.url)
+			.map(contentLength => Object.merge(release, { size: contentLength }))
+		)
 };
