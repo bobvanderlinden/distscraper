@@ -57,21 +57,12 @@ var repositoryDefinitions = [
 
 function getRxScraper(scraper) {
 	if (typeof scraper === 'function') {
-		var rxScraper = Rx.Observable.fromNodeCallback(scraper);
-
-		// Callback-based distribution
-		return Rx.Observable.defer(function() {
-			return rxScraper(request)
-				.map(distribution => Object.merge(distribution, {
-					releases: Rx.Observable.from(distribution.releases)
-				}));
-		});
-	} else {
-		// Rx based distribution
-		return Rx.Observable.defer(function() {
-			return Rx.Observable.just(scraper);
-		});
+		throw new Error('Invalid scraper', scraper);
 	}
+	// Rx based distribution
+	return Rx.Observable.defer(function() {
+		return Rx.Observable.just(scraper);
+	});
 }
 
 function resolveDistributionReleases(distribution) {
