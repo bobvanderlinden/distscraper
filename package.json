@@ -10,7 +10,7 @@
   "author": "Bob van der Linden",
   "license": "BSD",
   "dependencies": {
-    "async": "^2.0.0-rc.6",
+    "async": "^2.6.4",
     "charm": "^1.0.1",
     "cheerio": "^0.22.0",
     "commander": "^2.9.0",
